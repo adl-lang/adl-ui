@@ -3,8 +3,6 @@ import { FieldFns } from "./type";
 // A string field
 
 export const stringFieldFns: FieldFns<string> = {
-  width: 30,
-  rows: 1,
   toText(v) {
     return v;
   },
@@ -31,8 +29,6 @@ export const STRING_FIELD: FieldFns<string> = stringFieldFns;
 export function regexStringFieldFns(regex: string, description: string, returnGroup: number): FieldFns<string> {
   const re = new RegExp(regex);
   return {
-    width: 30,
-    rows: 1,
     toText(v) {
       return v;
     },
@@ -65,8 +61,6 @@ export const NON_EMPTY_STRING_FIELD: FieldFns<string> = regexStringFieldFns("^.+
 
 export function intFieldFns(minValue: number | null, maxValue: number | null): FieldFns<number> {
   return {
-    width: 12,
-    rows: 1,
     toText(v) {
       return "" + v;
     },
@@ -94,8 +88,6 @@ export function intFieldFns(minValue: number | null, maxValue: number | null): F
 // An arbitrary number
 export function numberFieldFns(): FieldFns<number> {
   return {
-    width: 12,
-    rows: 1,
     toText(v) {
       return "" + v;
     },
@@ -132,8 +124,6 @@ export const BIG_DECIMAL_STRING_FIELD: FieldFns<string> = bigDecimalFieldFns();
 
 export function boolFieldFns(): FieldFns<boolean> {
   return {
-    width: 12,
-    rows: 1,
     toText(v: boolean) {
       return v ? "true" : "false";
     },
@@ -161,8 +151,6 @@ export const BOOLEAN_FIELD: FieldFns<boolean> = boolFieldFns();
 
 export function jsonFieldFns(): FieldFns<unknown> {
   return {
-    width: 30,
-    rows: 4,
     toText(v: unknown): string {
       return JSON.stringify(v, null, 2);
     },
@@ -206,7 +194,6 @@ export function labelledValuesFieldFns<T>(
   mappings.forEach(m => {
     labelmap[m.label] = m.value;
   });
-  const datalist = mappings.map(m => m.label);
 
   function toText(value: T): string {
     for (const m of mappings) {
@@ -231,13 +218,10 @@ export function labelledValuesFieldFns<T>(
   }
 
   return {
-    width: 30,
-    rows: 1,
     toText,
     validate,
     fromText,
     equals,
-    datalist
   };
 }
 

@@ -33,8 +33,6 @@ export function adlPrimitiveFieldFns(primitive: string): FieldFns<unknown> | nul
 
 export function maybeField<T>(fieldFns: FieldFns<T>): FieldFns<systypes.Maybe<T>> {
   const newFieldFns: FieldFns<systypes.Maybe<T>> = {
-    width: fieldFns.width,
-    rows: fieldFns.rows,
     toText: v => (v.kind === "just" ? fieldFns.toText(v.value) : ""),
     validate: v => {
       if (v === "") {
@@ -56,9 +54,6 @@ export function maybeField<T>(fieldFns: FieldFns<T>): FieldFns<systypes.Maybe<T>
       }
     }
   };
-  if (fieldFns.datalist) {
-    newFieldFns.datalist = fieldFns.datalist;
-  }
   return newFieldFns;
 }
 
@@ -66,8 +61,6 @@ export function maybeField<T>(fieldFns: FieldFns<T>): FieldFns<systypes.Maybe<T>
 // Nullable combinator, that allows a field to be empty.
 export function nullableField<T>(fieldFns: FieldFns<T>): FieldFns<T | null> {
   const newFieldFns: FieldFns<T | null> = {
-    width: fieldFns.width,
-    rows: fieldFns.rows,
     toText: v => (v === null ? "" : fieldFns.toText(v)),
     validate: v => {
       if (v === "") {
@@ -86,9 +79,6 @@ export function nullableField<T>(fieldFns: FieldFns<T>): FieldFns<T | null> {
       return fieldFns.equals(v1, v2);
     }
   };
-  if (fieldFns.datalist) {
-    newFieldFns.datalist = fieldFns.datalist;
-  }
   return newFieldFns;
 }
 
@@ -132,8 +122,6 @@ export function nullableField<T>(fieldFns: FieldFns<T>): FieldFns<T | null> {
   }
 
   return {
-    width: 100,
-    rows: 5,
     toText, 
     equals,
     validate,
