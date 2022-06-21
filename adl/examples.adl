@@ -2,7 +2,13 @@ module examples {
 
 struct Person {
   String name;
+  String title;
   Word8 age;
+};
+
+struct Hierarchy {
+  Person leader;
+  Vector<Hierarchy> underlings;
 };
 
 };

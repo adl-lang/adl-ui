@@ -22,7 +22,7 @@ async function main() {
     runtimeDir: "runtime",
     includeRuntime: true,
     searchPath: [],
-    includeResolver: false,
+    includeResolver: true,
     manifest: tsadldir + "/.adl-manifest",
     verbose,
   });

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { TypedFieldState, useTypedFieldState } from "./field";
 import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../lib/fieldfns/primitive";
 
-storiesOf("Field", module)
+storiesOf("Primitive Fields", module)
   .add("String", () => {
     const fs = useTypedFieldState(STRING_FIELD);
     return renderTypedField(fs);
