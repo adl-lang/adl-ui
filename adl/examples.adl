@@ -1,0 +1,8 @@
+module examples {
+
+struct Person {
+  String name;
+  Word8 age;
+};
+
+};
