@@ -23,7 +23,15 @@ export interface VEditor<T, S, E> {
   update(state: S, event: E): S;
 
   // Render the editor's current state as a UI.
-  render(state: S, canEdit: boolean, onUpdate: UpdateFn<E>): JSX.Element;
+  render(state: S, canEdit: boolean, onUpdate: UpdateFn<E>): Rendered;
+}
+
+export interface Rendered {
+  // Content to be shown beside a label
+  beside: JSX.Element | undefined;
+
+  // Content to be shown indented below the label. 
+  below: JSX.Element | undefined;
 }
 
 export type UpdateFn<E> = (e: E) => void;

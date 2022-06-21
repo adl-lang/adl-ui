@@ -33,25 +33,21 @@ export interface CustomContext {
   typeExpr: adlast.TypeExpr;
 }
 
+
 export interface Factory {
   getCustomVEditor(ctx: CustomContext): UVEditor | null;
   getCustomField(ctx: CustomContext): FieldFns<unknown> | null;
 
-  boolVEditor(): UVEditor;
   voidVEditor(): UVEditor;
   fieldVEditor(ff: FieldFns<unknown>): UVEditor;
-  jsonVEditor(): UVEditor;
   unimplementedVEditor(type: string): UVEditor;
   structVEditor(resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
   unionVEditor(resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
-  enumVEditor(resolver: adlrt.DeclResolver, fields: adltree.Field[]): UVEditor;
   nullableVEditor(resolver: adlrt.DeclResolver, underlying: UVEditor): UVEditor;
   vectorVEditor(resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
-  structVectorVEditor(resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
-  unionVectorVEditor(resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
 }
 
-type VField = {
+export type VField = {
   field: adltree.Field;
   veditor: UVEditor;
 };
@@ -93,12 +89,8 @@ function createVEditor0(
   const details = adlTree.details();
   switch (details.kind) {
     case "primitive":
-      if (details.ptype === "Bool") {
-        return factory.boolVEditor();
-      } else if (details.ptype === "Void") {
+      if (details.ptype === "Void") {
         return factory.voidVEditor();
-      } else if (details.ptype === "Json") {
-        return factory.jsonVEditor();
       } else {
         const fldfns = createField(adlTree, customContext, factory);
         if (fldfns === null) {
@@ -125,10 +117,6 @@ function createVEditor0(
       return createVEditor0(declResolver, nullContext, details.adlTree, factory);
 
     case "union": {
-      if (isEnum(details.fields)) {
-        return factory.enumVEditor(declResolver, details.fields);
-      }
-
       // When T can be edited in a String field, we can use a string
       // field for Maybe<T> iff the empty string is not a valid value
       // of T.  So Maybe<Int> can be editied in a string field,
@@ -159,14 +147,7 @@ function createVEditor0(
     case "vector": {
       const vdetails = details.param.details();
       const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
-      if (vdetails.kind === "struct") {
-        return factory.structVectorVEditor(declResolver, underlyingVEditor);
-      } else if (vdetails.kind === "union" && !isEnum(vdetails.fields)) {
-        return factory.unionVectorVEditor(declResolver, underlyingVEditor);
-      } else {
-
-        return factory.vectorVEditor(declResolver, underlyingVEditor);
-      }
+      return factory.vectorVEditor(declResolver, underlyingVEditor);
     }
 
     case "stringmap":
