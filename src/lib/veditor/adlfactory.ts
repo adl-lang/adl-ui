@@ -5,7 +5,7 @@ import * as adlast from "../../adl-gen/sys/adlast";
 import * as systypes from "../../adl-gen/sys/types";
 import * as adltree from "../adl-tree";
 
-import {VEditor, UVEditor} from "./type";
+import {IVEditor, UVEditor} from "./type";
 import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
@@ -17,9 +17,9 @@ export function createVEditor<T>(
   typeExpr: adlrt.ATypeExpr<T>,
   declResolver: adlrt.DeclResolver,
   factory: Factory
-): VEditor<T, unknown, unknown> {
+): IVEditor<T, unknown, unknown> {
   const adlTree = adltree.createAdlTree(typeExpr.value, declResolver);
-  return createVEditor0(declResolver, nullContext, adlTree, factory) as VEditor<
+  return createVEditor0(declResolver, nullContext, adlTree, factory) as IVEditor<
     T,
     unknown,
     unknown
@@ -39,12 +39,12 @@ export interface Factory {
   getCustomField(ctx: CustomContext): FieldFns<unknown> | null;
 
   voidVEditor(): UVEditor;
-  fieldVEditor(ff: FieldFns<unknown>): UVEditor;
-  unimplementedVEditor(type: string): UVEditor;
-  structVEditor(resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
-  unionVEditor(resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
-  nullableVEditor(resolver: adlrt.DeclResolver, underlying: UVEditor): UVEditor;
-  vectorVEditor(resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
+  fieldVEditor(typeExpr: adlast.TypeExpr, ff: FieldFns<unknown>): UVEditor;
+  structVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
+  unionVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
+  nullableVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying: UVEditor): UVEditor;
+  vectorVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
+  unimplementedVEditor(typeExpr: adlast.TypeExpr): UVEditor;
 }
 
 export type VField = {
@@ -66,7 +66,7 @@ function createVEditor0(
   ctx: InternalContext,
   adlTree: adltree.AdlTree,
   factory: Factory,
-): VEditor<unknown, unknown, unknown> {
+): IVEditor<unknown, unknown, unknown> {
   const customContext = {
     declResolver,
     scopedDecl: ctx.scopedDecl,
@@ -81,7 +81,7 @@ function createVEditor0(
   }
   const customField = factory.getCustomField(customContext);
   if (customField) {
-    return factory.fieldVEditor(customField);
+    return factory.fieldVEditor(adlTree.typeExpr, customField);
   }
 
   // Otherwise construct a standard one
@@ -94,9 +94,9 @@ function createVEditor0(
       } else {
         const fldfns = createField(adlTree, customContext, factory);
         if (fldfns === null) {
-          return factory.unimplementedVEditor(details.kind);
+          return factory.unimplementedVEditor(adlTree.typeExpr);
         }
-        return factory.fieldVEditor(fldfns);
+        return factory.fieldVEditor(adlTree.typeExpr, fldfns);
       }
 
     case "struct": {
@@ -104,7 +104,7 @@ function createVEditor0(
         field:f, 
         veditor:createVEditor0(declResolver, nullContext,  f.adlTree, factory),
       }));
-      return factory.structVEditor(declResolver, vfields);
+      return factory.structVEditor(adlTree.typeExpr, declResolver, vfields);
     }
 
     case "newtype":
@@ -124,7 +124,7 @@ function createVEditor0(
       if (isMaybe(adlTree.typeExpr)) {
         const fldfns = createFieldForTParam0(adlTree, customContext, factory, declResolver);
         if (fldfns && fldfns.validate("") !== null) {
-          return factory.fieldVEditor(maybeField(fldfns));
+          return factory.fieldVEditor(adlTree.typeExpr, maybeField(fldfns));
         }
       }
 
@@ -132,22 +132,22 @@ function createVEditor0(
         field:f, 
         veditor:createVEditor0(declResolver, nullContext,  f.adlTree, factory),
       }));
-      return factory.unionVEditor(declResolver, vfields);
+      return factory.unionVEditor(adlTree.typeExpr, declResolver, vfields);
     }
 
     case "nullable":
       const fieldfns = createFieldForTParam0(adlTree, customContext, factory, declResolver);
       if (fieldfns !== null  && fieldfns.validate("") !== null) {
-        return factory.fieldVEditor(nullableField(fieldfns));
+        return factory.fieldVEditor(adlTree.typeExpr, nullableField(fieldfns));
       } else {
         const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
-        return factory.nullableVEditor(declResolver, underlyingVEditor);
+        return factory.nullableVEditor(adlTree.typeExpr, declResolver, underlyingVEditor);
       }
 
     case "vector": {
       const vdetails = details.param.details();
       const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
-      return factory.vectorVEditor(declResolver, underlyingVEditor);
+      return factory.vectorVEditor(adlTree.typeExpr, declResolver, underlyingVEditor);
     }
 
     case "stringmap":
@@ -177,7 +177,7 @@ function createVEditor0(
 
 // Create an editor over a Vector<Pair<K,V>>. This won't be required after
 // we update sys.types.Map to have that type
-function mapVEditor<K,V>(declResolver: adlrt.DeclResolver, ctx: InternalContext, factory: Factory, ktype: adlrt.ATypeExpr<K>, vtype: adlrt.ATypeExpr<V>): VEditor<systypes.Pair<K,V>[], unknown, unknown> {
+function mapVEditor<K,V>(declResolver: adlrt.DeclResolver, ctx: InternalContext, factory: Factory, ktype: adlrt.ATypeExpr<K>, vtype: adlrt.ATypeExpr<V>): IVEditor<systypes.Pair<K,V>[], unknown, unknown> {
   const map1 = (m: systypes.Pair<K,V>[]): systypes.MapEntry<K,V>[] => {
     return m.map( p => ({key:p.v1, value:p.v2}) );
   }
@@ -193,11 +193,11 @@ function mapVEditor<K,V>(declResolver: adlrt.DeclResolver, ctx: InternalContext,
 
 // Create an editor over a Vector<MapEntry<K,V>>. This won't be required after
 // we update sys.types.Map to have that type
-function mapEntryVectorVEditor<K,V>(declResolver: adlrt.DeclResolver, ctx: InternalContext, factory: Factory, ktype: adlrt.ATypeExpr<K>, vtype: adlrt.ATypeExpr<V>): VEditor<systypes.MapEntry<K,V>[], unknown, unknown> {
+function mapEntryVectorVEditor<K,V>(declResolver: adlrt.DeclResolver, ctx: InternalContext, factory: Factory, ktype: adlrt.ATypeExpr<K>, vtype: adlrt.ATypeExpr<V>): IVEditor<systypes.MapEntry<K,V>[], unknown, unknown> {
   type MapType = systypes.MapEntry<K,V>[];
   const mapTypeExpr : adlrt.ATypeExpr<MapType> = adlrt.texprVector(systypes.texprMapEntry(ktype,vtype));
   const mapAdlTree = adltree.createAdlTree(mapTypeExpr.value, declResolver);
-  return createVEditor0(declResolver, ctx, mapAdlTree, factory) as VEditor<MapType,unknown,unknown>;
+  return createVEditor0(declResolver, ctx, mapAdlTree, factory) as IVEditor<MapType,unknown,unknown>;
 }
 
 function createFieldForTParam0(
@@ -254,10 +254,10 @@ function createField1(
 /// Map a value editor from type A to a corresponding value
 /// editor over type B.
 export function mappedVEditor<A,B,S,E>(
-  veditor: VEditor<A,S,E>,
+  veditor: IVEditor<A,S,E>,
   aFromB: (b:B) => A,
   bFromA: (a:A) => B
-  ) : VEditor<B,S,E> {
+  ) : IVEditor<B,S,E> {
   return {
     initialState: veditor.initialState,
     stateFromValue: (b:B) => veditor.stateFromValue(aFromB(b)),

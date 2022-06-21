@@ -4,7 +4,7 @@
 //    S: the type of state required for editing
 //    E: the type of events
 
-export interface VEditor<T, S, E> {
+export interface IVEditor<T, S, E> {
   // The state for an empty editor
   initialState: S;
 
@@ -28,12 +28,13 @@ export interface VEditor<T, S, E> {
 
 export interface Rendered {
   // Content to be shown beside a label
-  beside: JSX.Element | undefined;
+  beside?: JSX.Element;
 
   // Content to be shown indented below the label. 
-  below: JSX.Element | undefined;
+  below?: JSX.Element;
 }
 
 export type UpdateFn<E> = (e: E) => void;
 
-export type UVEditor = VEditor<unknown, unknown, unknown>;
+export type VEditor<T> = IVEditor<T, unknown, unknown>;
+export type UVEditor = VEditor<unknown>;
