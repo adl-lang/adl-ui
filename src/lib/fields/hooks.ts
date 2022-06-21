@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { uniqueId } from "../lib/misc";
-import { FieldFns } from "../lib/fieldfns/type";
+import { uniqueId } from "../misc";
+import { FieldFns } from "./type";
 
 export interface TypedFieldState<T> {
   text: string;

@@ -6,9 +6,9 @@ import * as systypes from "../../adl-gen/sys/types";
 import * as adltree from "../adl-tree";
 
 import {VEditor, UVEditor} from "./type";
-import {FieldFns} from "../fieldfns/type";
+import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
-import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fieldfns/adl";
+import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
 
 /**
  * Construct a VEditor from a a specified ADL type
