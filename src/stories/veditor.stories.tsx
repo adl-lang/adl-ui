@@ -115,13 +115,7 @@ class VeditorFactory implements Factory {
     return this.unimplementedVEditor(adlrt.texprVoid().value);
   }
 
-  fieldVEditor<T>(typeExpr: adlast.TypeExpr, ff: FieldFns<T>): UVEditor {
-    function validate(t: string): string[] {
-      const err = ff.validate(t);
-      return err === null ? [] : [err];
-    }
-
-    function render(state: string, disabled: boolean, onUpdate: UpdateFn<string>): Rendered {
+  renderFieldEditor(ff: FieldFns<unknown>,disabled: boolean, state: string, onUpdate: UpdateFn<string>): Rendered {
       const errlabel = ff.validate(state);
       const beside = (
         <Row>
@@ -130,19 +124,7 @@ class VeditorFactory implements Factory {
         </Row>
         );
       return {beside};         
-    }
-
-    const veditor: IVEditor<T,string,string> = {
-      initialState: "",
-      stateFromValue: ff.toText,
-      validate,
-      valueFromState: ff.fromText,
-      update: (_s,e) => e,
-      render
-    };
-
-    return veditor;
-  }
+      }
 
   structVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor {
     return structVEditor(resolver, fields);
