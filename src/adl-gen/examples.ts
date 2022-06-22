@@ -3,32 +3,58 @@
 import * as ADL from './runtime/adl';
 
 export interface Person {
-  name: string;
-  title: string;
+  name: Name;
+  role: string;
   age: number;
 }
 
 export function makePerson(
   input: {
-    name: string,
-    title: string,
+    name: Name,
+    role: string,
     age: number,
   }
 ): Person {
   return {
     name: input.name,
-    title: input.title,
+    role: input.role,
     age: input.age,
   };
 }
 
 const Person_AST : ADL.ScopedDecl =
-  {"moduleName":"examples","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"name","default":{"kind":"nothing"},"name":"name","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"title","default":{"kind":"nothing"},"name":"title","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"age","default":{"kind":"nothing"},"name":"age","typeExpr":{"typeRef":{"kind":"primitive","value":"Word8"},"parameters":[]}}]}},"name":"Person","version":{"kind":"nothing"}}};
+  {"moduleName":"examples","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"name","default":{"kind":"nothing"},"name":"name","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"examples","name":"Name"}},"parameters":[]}},{"annotations":[],"serializedName":"role","default":{"kind":"nothing"},"name":"role","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"age","default":{"kind":"nothing"},"name":"age","typeExpr":{"typeRef":{"kind":"primitive","value":"Word8"},"parameters":[]}}]}},"name":"Person","version":{"kind":"nothing"}}};
 
 export const snPerson: ADL.ScopedName = {moduleName:"examples", name:"Person"};
 
 export function texprPerson(): ADL.ATypeExpr<Person> {
   return {value : {typeRef : {kind: "reference", value : snPerson}, parameters : []}};
+}
+
+export interface Name {
+  first: string;
+  last: string;
+}
+
+export function makeName(
+  input: {
+    first: string,
+    last: string,
+  }
+): Name {
+  return {
+    first: input.first,
+    last: input.last,
+  };
+}
+
+const Name_AST : ADL.ScopedDecl =
+  {"moduleName":"examples","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"first","default":{"kind":"nothing"},"name":"first","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"last","default":{"kind":"nothing"},"name":"last","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"Name","version":{"kind":"nothing"}}};
+
+export const snName: ADL.ScopedName = {moduleName:"examples", name:"Name"};
+
+export function texprName(): ADL.ATypeExpr<Name> {
+  return {value : {typeRef : {kind: "reference", value : snName}, parameters : []}};
 }
 
 export interface Hierarchy {
@@ -59,5 +85,6 @@ export function texprHierarchy(): ADL.ATypeExpr<Hierarchy> {
 
 export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {
   "examples.Person" : Person_AST,
+  "examples.Name" : Name_AST,
   "examples.Hierarchy" : Hierarchy_AST
 };

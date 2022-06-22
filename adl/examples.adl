@@ -1,9 +1,14 @@
 module examples {
 
 struct Person {
-  String name;
-  String title;
+  Name name;
+  String role;
   Word8 age;
+};
+
+struct Name {
+  String first;
+  String last;
 };
 
 struct Hierarchy {

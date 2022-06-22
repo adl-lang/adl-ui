@@ -23,7 +23,7 @@ export interface IVEditor<T, S, E> {
   update(state: S, event: E): S;
 
   // Render the editor's current state as a UI.
-  render(state: S, canEdit: boolean, onUpdate: UpdateFn<E>): Rendered;
+  render(state: S, disabled: boolean, onUpdate: UpdateFn<E>): Rendered;
 }
 
 export interface Rendered {
