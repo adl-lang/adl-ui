@@ -84,6 +84,7 @@ interface TParamBindings {
 //
 export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver): AdlTree {
   function mkTreeDetails(typeExpre: ast.TypeExpr, tParamBindings: TParamBindings): AdlTreeDetails {
+    console.log("mkTreeDetails");
     switch (typeExpre.typeRef.kind) {
       case "primitive":
         switch (typeExpre.typeRef.value) {

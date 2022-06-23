@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
-
 import * as adlrt  from "../adl-gen/runtime/adl";
 
 import {RESOLVER} from "../adl-gen/resolver";
 import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnimplementedEditorProps} from "../lib/veditor/adlfactory";
 import {  Rendered,  VEditor } from '../lib/veditor/type';
 import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
-import { texprName, texprPerson } from '../adl-gen/examples';
+import { texprName, texprPerson, texprHierarchy } from '../adl-gen/examples';
 
 storiesOf("VEditors", module)
   .add("String", () => {
@@ -37,6 +36,10 @@ storiesOf("VEditors", module)
   }) 
   .add("Person", () => {
     const veditor = createVEditor(texprPerson(), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  }) 
+  .add("Hierarchy", () => {
+    const veditor = createVEditor(texprHierarchy(), RESOLVER, VEDITOR_FACTORY);
     return renderVEditorStory(veditor);
   }) 
 
@@ -120,7 +123,7 @@ function renderFieldEditor(props: FieldEditorProps): Rendered {
 
 function renderStructEditor(props: StructEditorProps): Rendered {
   const rows = props.fields.map(fd => {
-    const label = props.disabled? <b>{fd.label}</b> : fd.label;
+    const label = props.disabled? fd.label : <b>{fd.label}</b>;
     const rendered = fd.veditor.render(fd.state, props.disabled, fd.onUpdate);
     return (
       <>

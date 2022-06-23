@@ -115,11 +115,7 @@ function createVEditor0(
       }
 
     case "struct": {
-      const vfields = details.fields.map( f => ({
-        field:f, 
-        veditor:createVEditor0(declResolver, nullContext,  f.adlTree, factory),
-      }));
-      return structVEditor(factory, declResolver, vfields);
+      return structVEditor(factory, declResolver, details);
     }
 
     case "newtype":
@@ -143,10 +139,6 @@ function createVEditor0(
         }
       }
 
-      const vfields = details.fields.map( f => ({
-        field:f, 
-        veditor:createVEditor0(declResolver, nullContext,  f.adlTree, factory),
-      }));
       return unimplementedVEditor(factory, adlTree.typeExpr);
     }
 
@@ -155,12 +147,12 @@ function createVEditor0(
       if (fieldfns !== null  && fieldfns.validate("") !== null) {
         return fieldVEditor(factory, adlTree.typeExpr, nullableField(fieldfns));
       } else {
-        const _underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
+        // const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
         return unimplementedVEditor(factory, adlTree.typeExpr);
       }
 
     case "vector": {
-      const _underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
+      // const _underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
       return unimplementedVEditor(factory, adlTree.typeExpr);
     }
 
@@ -232,12 +224,10 @@ export type VField = {
 function structVEditor(
   factory: Factory,
   declResolver: adlrt.DeclResolver,
-  fields: VField[],
+  struct: adltree.Struct,
 ): IVEditor<unknown, StructState, StructEvent> {
-
-  const fieldDetails = fields.map(f => {
-    const field = f.field;
-    const veditor = f.veditor;
+  const fieldDetails = struct.fields.map(field => {
+    const veditor = createVEditor0(declResolver, nullContext,  field.adlTree, factory);
     const jsonBinding = createJsonBinding<unknown>(declResolver, { value: field.adlTree.typeExpr });
 
     return {
@@ -460,7 +450,7 @@ export function mappedVEditor<A,B,S,E>(
   };
 }
 
-function sEnum(fields: adltree.Field[]): boolean {
+function isEnum(fields: adltree.Field[]): boolean {
   for (const f of fields) {
     const isVoid =
       f.astField.typeExpr.typeRef.kind === "primitive" &&
