@@ -4,6 +4,7 @@ import * as adlrt  from "../../adl-gen/runtime/adl";
 import * as adlast from "../../adl-gen/sys/adlast";
 import * as systypes from "../../adl-gen/sys/types";
 import * as adltree from "../adl-tree";
+import { createJsonBinding } from '../../adl-gen/runtime/json';
 
 import {IVEditor, UVEditor, UpdateFn, Rendered} from "./type";
 import {FieldFns} from "../fields/type";
@@ -39,13 +40,35 @@ export interface Factory {
   getCustomField(ctx: CustomContext): FieldFns<unknown> | null;
 
   voidVEditor(): UVEditor;
-  renderFieldEditor(ff: FieldFns<unknown>,ddisabled: boolean, state: string, onUpdate: UpdateFn<string>): Rendered;
-  structVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
+  renderFieldEditor(props: FieldEditorProps): Rendered;
+  renderStructEditor(props: StructEditorProps): Rendered;
+
   unionVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
   nullableVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying: UVEditor): UVEditor;
   vectorVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
   unimplementedVEditor(typeExpr: adlast.TypeExpr): UVEditor;
 }
+
+export interface FieldEditorProps {
+  fieldfns: FieldFns<unknown>;
+  disabled: boolean;
+  state: string;
+  onUpdate: UpdateFn<string>  
+};
+
+export interface StructEditorProps {
+  fields: StructFieldProps<unknown,unknown,unknown>[];
+  disabled: boolean;
+}
+
+export interface StructFieldProps<T,S,E> {
+  name: string;
+  label: string;
+  veditor: IVEditor<T,S,E>;
+  state: S;
+  onUpdate: (e: E) => void;
+}
+
 
 export type VField = {
   field: adltree.Field;
@@ -104,7 +127,7 @@ function createVEditor0(
         field:f, 
         veditor:createVEditor0(declResolver, nullContext,  f.adlTree, factory),
       }));
-      return factory.structVEditor(adlTree.typeExpr, declResolver, vfields);
+      return structVEditor(factory, declResolver, vfields);
     }
 
     case "newtype":
@@ -145,7 +168,6 @@ function createVEditor0(
       }
 
     case "vector": {
-      const vdetails = details.param.details();
       const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
       return factory.vectorVEditor(adlTree.typeExpr, declResolver, underlyingVEditor);
     }
@@ -175,22 +197,162 @@ function createVEditor0(
   }
 }
 
-function fieldVEditor<T>(factory: Factory, _typeExpr: adlast.TypeExpr, ff: FieldFns<T>): UVEditor {
+function fieldVEditor<T>(factory: Factory, _typeExpr: adlast.TypeExpr, fieldfns: FieldFns<T>): UVEditor {
   function validate(t: string): string[] {
-    const err = ff.validate(t);
+    const err = fieldfns.validate(t);
     return err === null ? [] : [err];
   }
 
   const veditor: IVEditor<T,string,string> = {
     initialState: "",
-    stateFromValue: ff.toText,
+    stateFromValue: fieldfns.toText,
     validate,
-    valueFromState: ff.fromText,
+    valueFromState: fieldfns.fromText,
     update: (_s,e) => e,
-    render: (s, disabled, onUpdate) => factory.renderFieldEditor(ff, disabled, s, onUpdate),
+    render: (state, disabled, onUpdate) => factory.renderFieldEditor({fieldfns, disabled, state, onUpdate}),
   };
 
   return veditor;
+}
+
+interface StructFieldStates {
+  [key: string]: unknown;
+}
+interface StructState {
+  fieldStates: StructFieldStates;
+}
+interface StructFieldEvent {
+  kind: "field";
+  field: string;
+  fieldEvent: unknown;
+}
+type StructEvent = StructFieldEvent;
+
+function structVEditor(
+  factory: Factory,
+  declResolver: adlrt.DeclResolver,
+  fields: VField[],
+): IVEditor<unknown, StructState, StructEvent> {
+
+  const fieldDetails = fields.map(f => {
+    const field = f.field;
+    const veditor = f.veditor;
+    const jsonBinding = createJsonBinding<unknown>(declResolver, { value: field.adlTree.typeExpr });
+
+    return {
+      name: field.astField.name,
+      default: field.astField.default,
+      jsonBinding,
+      label: fieldLabel(field.astField.name),
+      veditor,
+    };
+  });
+
+  const veditorsByName : Record<string,UVEditor>  = {};
+  const initialState : StructState = { fieldStates: {} };
+
+  // It's unclear what the initialState for an empty struct
+  // editor should be... either every field empty, or
+  // with default values filled in for those fields that have
+  // defaults specified. the flag below set's this behaviour, though
+  // we may want to change initialState to be a function that takes
+  // this as a parameter.
+  const USE_DEFAULTS_FOR_STRUCT_FIELDS = true;
+
+  for (const fd of fieldDetails) {
+    veditorsByName[fd.name] = fd.veditor;
+    if (USE_DEFAULTS_FOR_STRUCT_FIELDS && fd.default.kind === "just") {
+      initialState.fieldStates[fd.name] = fd.veditor.stateFromValue(
+        fd.jsonBinding.fromJsonE(fd.default.value)
+      );
+    } else {
+      initialState.fieldStates[fd.name] = fd.veditor.initialState;
+    }
+  }
+
+  function stateFromValue(value: Record<string,unknown>) {
+    const state: StructState = {
+      fieldStates: {},
+    };
+    for (const fd of fieldDetails) {
+      state.fieldStates[fd.name] = fd.veditor.stateFromValue(value[fd.name]);
+    }
+    return state;
+  }
+
+  function validate(state: StructState) {
+    let errors: string[] = [];
+    for (const fd of fieldDetails) {
+      errors = errors.concat(fd.veditor.validate(state.fieldStates[fd.name]).map(err => fd.name + ": " + err));
+    }
+    return errors;
+  }
+
+  function valueFromState(state: StructState) {
+    const value: Record<string,unknown> = {};
+    for (const fd of fieldDetails) {
+      value[fd.name] = fd.veditor.valueFromState(state.fieldStates[fd.name]);
+    }
+    return value;
+  }
+
+  function update(state: StructState, event: StructEvent): StructState {
+    if (event.kind === "field") {
+      const newFieldStates = {
+        ...state.fieldStates
+      };
+      const newfs = veditorsByName[event.field].update(
+        state.fieldStates[event.field],
+        event.fieldEvent
+      );
+      newFieldStates[event.field] = newfs;
+      const newState =  {
+        fieldStates: newFieldStates,
+      };
+      return newState;
+    } else {
+      return state;
+    }
+  }
+
+  function render(
+    state: StructState,
+    disabled: boolean,
+    onUpdate: UpdateFn<StructEvent>
+  ): Rendered {
+    const fields: StructFieldProps<unknown,unknown,unknown>[] =  fieldDetails.map(fd => ({
+      ...fd,
+      state: state.fieldStates[fd.name],
+      onUpdate: event => {
+        onUpdate({ kind: "field", field: fd.name, fieldEvent: event });
+      }
+     }));
+    return factory.renderStructEditor({fields, disabled});
+  }
+
+  return {
+    initialState,
+    stateFromValue,
+    validate,
+    valueFromState,
+    update,
+    render
+  };
+}
+
+// Convert snake/camel case to human readable spaced name
+export function fieldLabel(name: string): string {
+  return (
+    name
+      // insert a space before all caps
+      .replace(/([A-Z])/g, " $1")
+      // uppercase the first character
+      .replace(/^./, function(str) {
+        return str.toUpperCase();
+      })
+      // replace _ with space
+      .replace(/_/g, " ")
+  );
 }
 
 
@@ -288,7 +450,7 @@ export function mappedVEditor<A,B,S,E>(
   };
 }
 
-function isEnum(fields: adltree.Field[]): boolean {
+function sEnum(fields: adltree.Field[]): boolean {
   for (const f of fields) {
     const isVoid =
       f.astField.typeExpr.typeRef.kind === "primitive" &&
