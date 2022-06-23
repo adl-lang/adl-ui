@@ -15,7 +15,5 @@
     "dist",
     "node_modules",
     "deno",
-    "src/**/*.test.tsx",
-    "src/**/*.stories.tsx",
   ],
 }

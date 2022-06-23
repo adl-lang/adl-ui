@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
 import * as adlrt  from "../adl-gen/runtime/adl";
-import * as adlast from "../adl-gen/sys/adlast";
 
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor, CustomContext, Factory, StructEditorProps, FieldEditorProps, UnimplementedEditorProps} from "../lib/veditor/adlfactory";
+import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnimplementedEditorProps} from "../lib/veditor/adlfactory";
 import {  Rendered,  VEditor } from '../lib/veditor/type';
 import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
 import { texprName, texprPerson } from '../adl-gen/examples';
@@ -42,9 +41,9 @@ storiesOf("VEditors", module)
   }) 
 
 function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial?: T): JSX.Element {
-  const [state,setState] = useState(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
+  const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const errs = veditor.validate(state);
-  const elements = veditor.render(state, disabled || false, e => setState(s => veditor.update(s,e)));
+  const elements = veditor.render(state, disabled || false, e => setState((s:unknown) => veditor.update(s,e)));
   console.log(errs);
   return (
     <Content>
