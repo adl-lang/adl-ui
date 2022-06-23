@@ -6,8 +6,8 @@ import * as adlrt  from "../adl-gen/runtime/adl";
 import * as adlast from "../adl-gen/sys/adlast";
 
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor, CustomContext, Factory, VField, StructEditorProps, FieldEditorProps} from "../lib/veditor/adlfactory";
-import {  Rendered,  UVEditor, VEditor } from '../lib/veditor/type';
+import {createVEditor, CustomContext, Factory, StructEditorProps, FieldEditorProps, UnimplementedEditorProps} from "../lib/veditor/adlfactory";
+import {  Rendered,  VEditor } from '../lib/veditor/type';
 import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
 import { texprName, texprPerson } from '../adl-gen/examples';
 
@@ -98,56 +98,13 @@ font-size: 14px;
 color: #b71c1c;
 `;
 
-class VeditorFactory implements Factory {
-
-  getCustomVEditor(ctx: CustomContext) {
-    return null;
-  }
-
-  getCustomField(ctx: CustomContext) {
-    return null;
-  }
-
-  voidVEditor(): UVEditor {
-    return this.unimplementedVEditor(adlrt.texprVoid().value);
-  }
-
-  renderFieldEditor(props: FieldEditorProps): Rendered {
-    return renderFieldEditor(props);
-  }
-
-  renderStructEditor(props: StructEditorProps): Rendered {
-    return renderStructEditor(props);
-  }
-
-  unionVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor {
-    return this.unimplementedVEditor(typeExpr);
-  }
-
-  nullableVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying: UVEditor): UVEditor {
-    return this.unimplementedVEditor(typeExpr);
-  }
-
-  vectorVEditor(typeExpr: adlast.TypeExpr, esolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor {
-    return this.unimplementedVEditor(typeExpr);
-  }
-
-  unimplementedVEditor(typeExpr: adlast.TypeExpr): UVEditor {
-    return {
-      initialState: null,
-      stateFromValue: () => null,
-      validate: () => null,
-      valueFromState: () => null,
-      update: () => {},
-      render: () => ({
-        beside: <div>unimplemented veditor for {typeExprToStringUnscoped(typeExpr)}</div>,
-        below: undefined,
-      })
-    };
-  }
-}
-
-const VEDITOR_FACTORY = new VeditorFactory();
+const VEDITOR_FACTORY: Factory = {
+  getCustomVEditor : () => null,
+  getCustomField : () => null,
+  renderFieldEditor,
+  renderStructEditor,
+  renderUnimplementedEditor,
+};
 
 function renderFieldEditor(props: FieldEditorProps): Rendered {
   const {fieldfns, disabled, state, onUpdate} = props;
@@ -203,3 +160,10 @@ const StructFieldBelow = styled.td`
   padding-left: 50px;
 `;
 
+
+function renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered {
+  return {
+    beside: <div>unimplemented veditor for {typeExprToStringUnscoped(props.typeExpr)}</div>,
+    below: undefined,
+    }
+}

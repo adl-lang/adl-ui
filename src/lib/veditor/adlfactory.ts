@@ -39,14 +39,10 @@ export interface Factory {
   getCustomVEditor(ctx: CustomContext): UVEditor | null;
   getCustomField(ctx: CustomContext): FieldFns<unknown> | null;
 
-  voidVEditor(): UVEditor;
   renderFieldEditor(props: FieldEditorProps): Rendered;
   renderStructEditor(props: StructEditorProps): Rendered;
 
-  unionVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, fields: VField[]): UVEditor;
-  nullableVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying: UVEditor): UVEditor;
-  vectorVEditor(typeExpr: adlast.TypeExpr, resolver: adlrt.DeclResolver, underlying:  UVEditor):  UVEditor;
-  unimplementedVEditor(typeExpr: adlast.TypeExpr): UVEditor;
+  renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered;
 }
 
 export interface FieldEditorProps {
@@ -69,13 +65,9 @@ export interface StructFieldProps<T,S,E> {
   onUpdate: (e: E) => void;
 }
 
-
-export type VField = {
-  field: adltree.Field;
-  veditor: UVEditor;
-};
-
-
+export interface UnimplementedEditorProps {
+  typeExpr: adlast.TypeExpr;
+}
 
 interface InternalContext {
   scopedDecl: adlast.ScopedDecl | null;
@@ -113,11 +105,11 @@ function createVEditor0(
   switch (details.kind) {
     case "primitive":
       if (details.ptype === "Void") {
-        return factory.voidVEditor();
+        return unimplementedVEditor(factory, adlTree.typeExpr);
       } else {
         const fldfns = createField(adlTree, customContext, factory);
         if (fldfns === null) {
-          return factory.unimplementedVEditor(adlTree.typeExpr);
+          return unimplementedVEditor(factory, adlTree.typeExpr);
         }
         return fieldVEditor(factory, adlTree.typeExpr, fldfns);
       }
@@ -155,7 +147,7 @@ function createVEditor0(
         field:f, 
         veditor:createVEditor0(declResolver, nullContext,  f.adlTree, factory),
       }));
-      return factory.unionVEditor(adlTree.typeExpr, declResolver, vfields);
+      return unimplementedVEditor(factory, adlTree.typeExpr);
     }
 
     case "nullable":
@@ -163,13 +155,13 @@ function createVEditor0(
       if (fieldfns !== null  && fieldfns.validate("") !== null) {
         return fieldVEditor(factory, adlTree.typeExpr, nullableField(fieldfns));
       } else {
-        const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
-        return factory.nullableVEditor(adlTree.typeExpr, declResolver, underlyingVEditor);
+        const _underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
+        return unimplementedVEditor(factory, adlTree.typeExpr);
       }
 
     case "vector": {
-      const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
-      return factory.vectorVEditor(adlTree.typeExpr, declResolver, underlyingVEditor);
+      const _underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
+      return unimplementedVEditor(factory, adlTree.typeExpr);
     }
 
     case "stringmap":
@@ -218,15 +210,24 @@ function fieldVEditor<T>(factory: Factory, _typeExpr: adlast.TypeExpr, fieldfns:
 interface StructFieldStates {
   [key: string]: unknown;
 }
+
 interface StructState {
   fieldStates: StructFieldStates;
 }
+
 interface StructFieldEvent {
   kind: "field";
   field: string;
   fieldEvent: unknown;
 }
+
 type StructEvent = StructFieldEvent;
+
+export type VField = {
+  field: adltree.Field;
+  veditor: UVEditor;
+};
+
 
 function structVEditor(
   factory: Factory,
@@ -355,7 +356,16 @@ export function fieldLabel(name: string): string {
   );
 }
 
-
+function unimplementedVEditor(factory: Factory, typeExpr: adlast.TypeExpr): UVEditor {
+    return {
+      initialState: null,
+      stateFromValue: () => null,
+      validate: () => [],
+      valueFromState: () => null,
+      update: () => {},
+      render: () => factory.renderUnimplementedEditor({typeExpr}),
+    };
+  }
 
 // Create an editor over a Vector<Pair<K,V>>. This won't be required after
 // we update sys.types.Map to have that type
