@@ -41,6 +41,7 @@ export interface Factory {
 
   renderFieldEditor(props: FieldEditorProps): Rendered;
   renderStructEditor(props: StructEditorProps): Rendered;
+  renderUnionEditor(props: UnionEditorProps): Rendered;
 
   renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered;
 }
@@ -53,17 +54,31 @@ export interface FieldEditorProps {
 };
 
 export interface StructEditorProps {
-  fields: StructFieldProps<unknown,unknown,unknown>[];
+  fields: StructFieldProps[];
   disabled: boolean;
 }
 
-export interface StructFieldProps<T,S,E> {
+export interface StructFieldProps {
   name: string;
   label: string;
+  veditor: VEditorProps<unknown,unknown, unknown>
+}
+
+export interface UnionEditorProps {
+  labels: string[],
+  selected: number | undefined,
+
+  onSelect: (newSelected: number) => void;
+
+  veditor: VEditorProps<unknown,unknown,unknown> | undefined;
+}
+
+export interface VEditorProps<T,S,E> {
   veditor: IVEditor<T,S,E>;
   state: S;
   onUpdate: (e: E) => void;
 }
+
 
 export interface UnimplementedEditorProps {
   typeExpr: adlast.TypeExpr;
@@ -139,7 +154,8 @@ function createVEditor0(
         }
       }
 
-      return unimplementedVEditor(factory, adlTree.typeExpr);
+
+      return unionVEditor(factory, declResolver, adlTree, details);
     }
 
     case "nullable":
@@ -311,11 +327,14 @@ function structVEditor(
     disabled: boolean,
     onUpdate: UpdateFn<StructEvent>
   ): Rendered {
-    const fields: StructFieldProps<unknown,unknown,unknown>[] =  fieldDetails.map(fd => ({
+    const fields: StructFieldProps[] =  fieldDetails.map(fd => ({
       ...fd,
-      state: state.fieldStates[fd.name],
-      onUpdate: event => {
-        onUpdate({ kind: "field", field: fd.name, fieldEvent: event });
+      veditor: {
+        veditor: fd.veditor,
+        state: state.fieldStates[fd.name],
+        onUpdate: event => {
+          onUpdate({ kind: "field", field: fd.name, fieldEvent: event });
+        }
       }
      }));
     return factory.renderStructEditor({fields, disabled});
@@ -344,6 +363,15 @@ export function fieldLabel(name: string): string {
       // replace _ with space
       .replace(/_/g, " ")
   );
+}
+
+function unionVEditor(
+  factory: Factory,
+  declResolver: adlrt.DeclResolver,
+  adlTree: adltree.AdlTree,
+  union: adltree.Union,
+): IVEditor<unknown, unknown, unknown> {
+   return unimplementedVEditor(factory, adlTree.typeExpr)
 }
 
 function unimplementedVEditor(factory: Factory, typeExpr: adlast.TypeExpr): UVEditor {

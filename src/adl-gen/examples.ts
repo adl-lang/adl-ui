@@ -83,8 +83,39 @@ export function texprHierarchy(): ADL.ATypeExpr<Hierarchy> {
   return {value : {typeRef : {kind: "reference", value : snHierarchy}, parameters : []}};
 }
 
+export interface Gender_Female {
+  kind: 'female';
+}
+export interface Gender_Male {
+  kind: 'male';
+}
+export interface Gender_Other {
+  kind: 'other';
+  value: string;
+}
+
+export type Gender = Gender_Female | Gender_Male | Gender_Other;
+
+export interface GenderOpts {
+  female: null;
+  male: null;
+  other: string;
+}
+
+export function makeGender<K extends keyof GenderOpts>(kind: K, value: GenderOpts[K]) { return {kind, value}; }
+
+const Gender_AST : ADL.ScopedDecl =
+  {"moduleName":"examples","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"female","default":{"kind":"nothing"},"name":"female","typeExpr":{"typeRef":{"kind":"primitive","value":"Void"},"parameters":[]}},{"annotations":[],"serializedName":"male","default":{"kind":"nothing"},"name":"male","typeExpr":{"typeRef":{"kind":"primitive","value":"Void"},"parameters":[]}},{"annotations":[],"serializedName":"other","default":{"kind":"nothing"},"name":"other","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"Gender","version":{"kind":"nothing"}}};
+
+export const snGender: ADL.ScopedName = {moduleName:"examples", name:"Gender"};
+
+export function texprGender(): ADL.ATypeExpr<Gender> {
+  return {value : {typeRef : {kind: "reference", value : snGender}, parameters : []}};
+}
+
 export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {
   "examples.Person" : Person_AST,
   "examples.Name" : Name_AST,
-  "examples.Hierarchy" : Hierarchy_AST
+  "examples.Hierarchy" : Hierarchy_AST,
+  "examples.Gender" : Gender_AST
 };

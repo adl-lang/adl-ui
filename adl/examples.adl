@@ -16,4 +16,10 @@ struct Hierarchy {
   Vector<Hierarchy> underlings;
 };
 
+union Gender {
+  Void female;
+  Void male;
+  String other;
+};
+
 };
