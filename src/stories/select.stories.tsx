@@ -23,31 +23,45 @@ interface SelectProps {
 
 export function Select(props: SelectProps) {
   const state = props.state;
-  return <SelectContainer>
-    <div onClick={state.onClick} >{state.current} ▼</div>
-    { state.active && 
-      <SelectChoices>
-        { state.choices.map( (s,i) => <div onClick={() => state.onChoice(i)}>{s}</div>) }
-      </SelectChoices>
+
+  const current = state.current == null ? "???" : state.choices[state.current];
+  
+  const NO_CHOICE = "???";
+  const labels = [
+    NO_CHOICE,
+    ...state.choices
+  ]
+  
+  console.log("labels", labels);
+  
+  function onChange(ev: React.ChangeEvent<HTMLSelectElement>) {
+    if (ev.target.value === NO_CHOICE) {
+      props.state.onChoice(null);
+    } else {
+      props.state.onChoice(state.choices.findIndex(c => c === ev.target.value ));
     }
-  </SelectContainer>;
+  }
+  
+  const Select = current  == NO_CHOICE ? NoChoiceStyledSelect : StyledSelect;
+    
+  return (
+    <Select value={current} onChange={onChange}>
+      {labels.map( l => <Option key={l}>{l}</Option> )}
+    </Select>
+  );
 }
 
-const SelectContainer = styled.div`
-  position: relative;
-  display: inline-block;
+const StyledSelect = styled.select`
   font-size: 14px;
   font-family: sans-serif;
-  cursor: pointer;
-`
-
-const SelectChoices = styled.div`
-  position: absolute;
-  z-index: 1;
-  border 1px solid;
-  border-radius: 4px;
-  padding: 6px;
+  border: none;
+  background-color: white;
 `;
 
+const NoChoiceStyledSelect = styled(StyledSelect)`
+color: #b71c1c;
+`
 
-
+const Option = styled.option`
+  color: black;
+`

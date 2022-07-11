@@ -8,6 +8,7 @@ import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnionEditor
 import {  Rendered,  VEditor } from '../lib/veditor/type';
 import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
 import * as adlex from '../adl-gen/examples';
+import { Select } from "./select.stories";
 
 storiesOf("VEditors", module)
   .add("String", () => {
@@ -59,7 +60,7 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
       <hr/>
       {errs.length === 0 
          ? <Valid>Value:<br/><br/>{JSON.stringify(veditor.valueFromState(state), null, 2)}</Valid>
-         : <Errors>Errors:<br/><br/>{errs}</Errors>
+         : <Errors>Errors:<br/><br/>{errs.join("\n")}</Errors>
       }
     </Content>
   );
@@ -86,7 +87,7 @@ const Valid = styled.pre`
 `;
 
 const Errors = styled.pre`
-  color: red;
+color: #b71c1c;
 `;
 
 const StyledInput = styled.input`
@@ -110,8 +111,13 @@ const VEDITOR_FACTORY: Factory = {
   renderFieldEditor,
   renderStructEditor,
   renderUnionEditor,
+  renderVoidEditor,
   renderUnimplementedEditor,
 };
+
+function renderVoidEditor(): Rendered {
+  return {};
+}
 
 function renderFieldEditor(props: FieldEditorProps): Rendered {
   const {fieldfns, disabled, state, onUpdate} = props;
@@ -151,8 +157,13 @@ function renderStructEditor(props: StructEditorProps): Rendered {
 }
 
 function renderUnionEditor(props: UnionEditorProps): Rendered {
-   const beside = <div/>;
-   const below = <div/>;
+
+   const beside = <Select state={props.selectState}/>;
+   if( !props.veditor) {
+     return {beside};
+   }
+   const r = props.veditor.veditor.render(props.veditor.state, props.disabled, props.veditor.onUpdate);
+   const below = <div>{r.beside}{r.below}</div>;
    return {
     beside,
     below

@@ -10,6 +10,7 @@ import {IVEditor, UVEditor, UpdateFn, Rendered} from "./type";
 import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
+import { SelectState } from "../select";
 
 /**
  * Construct a VEditor from a a specified ADL type
@@ -42,6 +43,7 @@ export interface Factory {
   renderFieldEditor(props: FieldEditorProps): Rendered;
   renderStructEditor(props: StructEditorProps): Rendered;
   renderUnionEditor(props: UnionEditorProps): Rendered;
+  renderVoidEditor(): Rendered;
 
   renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered;
 }
@@ -65,12 +67,9 @@ export interface StructFieldProps {
 }
 
 export interface UnionEditorProps {
-  labels: string[],
-  selected: number | undefined,
-
-  onSelect: (newSelected: number) => void;
-
-  veditor: VEditorProps<unknown,unknown,unknown> | undefined;
+  selectState: SelectState,
+  veditor: VEditorProps<unknown,unknown,unknown> | null;
+  disabled: boolean;
 }
 
 export interface VEditorProps<T,S,E> {
@@ -120,7 +119,7 @@ function createVEditor0(
   switch (details.kind) {
     case "primitive":
       if (details.ptype === "Void") {
-        return unimplementedVEditor(factory, adlTree.typeExpr);
+        return voidVEditor(factory);
       } else {
         const fldfns = createField(adlTree, customContext, factory);
         if (fldfns === null) {
@@ -195,6 +194,18 @@ function createVEditor0(
         stringMapFromMap,
       );
   }
+}
+
+function voidVEditor(factory: Factory): IVEditor<null,null,null> {
+  return {
+    initialState: null,
+    stateFromValue: () => null,
+    validate: () => [],
+    valueFromState: () => null,
+    update: s => s,
+    render: () => factory.renderVoidEditor(),
+  };
+
 }
 
 function fieldVEditor<T>(factory: Factory, _typeExpr: adlast.TypeExpr, fieldfns: FieldFns<T>): UVEditor {
@@ -365,14 +376,164 @@ export function fieldLabel(name: string): string {
   );
 }
 
+
+interface UnionState {
+  currentField: string | null;
+  selectActive: boolean,
+  fieldStates: { [key: string]: unknown };
+}
+
+interface UnionToggleActive {
+  kind: "toggleActive",
+} // Show the dropdown
+interface UnionSetField {
+  kind: "switch";
+  field: string | null;
+} // Switch the discriminator
+interface UnionUpdate {
+  kind: "update";
+  event: unknown;
+} // Update the value
+type UnionEvent = UnionToggleActive | UnionSetField | UnionUpdate;
+
+interface SomeUnion {
+  kind: string;
+  value: unknown;
+}
+
 function unionVEditor(
   factory: Factory,
   declResolver: adlrt.DeclResolver,
-  adlTree: adltree.AdlTree,
+  _adlTree: adltree.AdlTree,
   union: adltree.Union,
-): IVEditor<unknown, unknown, unknown> {
-   return unimplementedVEditor(factory, adlTree.typeExpr)
-}
+): IVEditor<SomeUnion, UnionState, UnionEvent> {
+
+  const fieldDetails = union.fields.map(field => {
+    const formLabel = fieldLabel(field.astField.name);
+    const ctx = {
+      scopedDecl: { moduleName: union.moduleName, decl: union.astDecl },
+      field: field.astField
+    };
+
+    return {
+      name: field.astField.name,
+      label: formLabel,
+      veditor: () => createVEditor0(declResolver, ctx, field.adlTree, factory)
+    };
+  });
+
+  const veditorsByName : {[name: string]: () => UVEditor}= {};
+  for (const fd of fieldDetails) {
+    veditorsByName[fd.name] = fd.veditor;
+  }
+
+  const initialState = { currentField: null, selectActive: false, fieldStates: {} };
+
+  function stateFromValue(uvalue: SomeUnion): UnionState {
+    const kind = uvalue.kind;
+    if (!kind) {
+      throw new Error("union must have kind field");
+    }
+    const value = uvalue.value === undefined ? null : uvalue.value;
+    const veditor = veditorsByName[kind]();
+    if (!veditor) {
+      throw new Error("union with invalid kind field");
+    }
+    return {
+      currentField: kind,
+      selectActive: false,
+      fieldStates: { [kind]: veditor.stateFromValue(value) }
+    };
+  }
+
+  function validate(state: UnionState): string[] {
+    const kind = state.currentField;
+    if (kind === null) {
+      return ["selection required"];
+    }
+    return veditorsByName[kind]().validate(state.fieldStates[kind]);
+  }
+
+  function valueFromState(state: UnionState): SomeUnion {
+    const kind = state.currentField;
+    if (kind === null) {
+      throw new Error("BUG: union valueFromState called on invalid state");
+    }
+    const value = veditorsByName[kind]().valueFromState(state.fieldStates[kind]);
+    return { kind, value };
+  }
+
+  function update(state: UnionState, event: UnionEvent): UnionState {
+    if (event.kind === "toggleActive") {
+      return {
+        ...state,
+        selectActive: !state.selectActive,
+      };
+    } else if (event.kind === "switch") {
+      const field = event.field;
+      const newFieldStates = { ...state.fieldStates };
+      if (field && !newFieldStates[field]) {
+        newFieldStates[field] = veditorsByName[field]().initialState;
+      }
+      return {
+        currentField: event.field,
+        selectActive: state.selectActive,
+        fieldStates: newFieldStates
+      };
+    } else if (event.kind === "update") {
+      const field = state.currentField;
+      if (field === null) {
+        throw new Error("BUG: union update received when current field not set");
+      }
+      const newFieldStates = { ...state.fieldStates };
+      newFieldStates[field] = veditorsByName[field]().update(newFieldStates[field], event.event);
+      return {
+        ...state,
+        fieldStates: newFieldStates
+      };
+    } else {
+      return state;
+    }
+  }
+  
+  function render(state: UnionState, disabled: boolean, onUpdate: UpdateFn<UnionEvent>): Rendered {
+    
+    let current: number | null = null;
+    if (state.currentField) {
+      current = fieldDetails.findIndex(fd => fd.name == state.currentField);
+    }
+
+    const selectState: SelectState = {
+      current,
+      active: state.selectActive,
+      choices: fieldDetails.map(fd => fd.label),
+      onClick: () => onUpdate({kind:"toggleActive"}),
+      onChoice: (i:number | null) => {
+        onUpdate({kind:"toggleActive"});
+        onUpdate({kind:"switch", field: i === null ? null : fieldDetails[i].name});
+      },
+    };
+    
+    let veditor: VEditorProps<unknown,unknown,unknown> | null = null;
+    if (state.currentField) {
+      veditor = {
+        veditor: veditorsByName[state.currentField](),
+        state: state.fieldStates[state.currentField],
+        onUpdate: event => onUpdate({kind:"update",event})
+      }
+    }
+
+    return factory.renderUnionEditor({selectState,disabled,veditor});
+  }
+
+  return {
+    initialState,
+    stateFromValue,
+    validate,
+    valueFromState,
+    update,
+    render
+  };}
 
 function unimplementedVEditor(factory: Factory, typeExpr: adlast.TypeExpr): UVEditor {
     return {

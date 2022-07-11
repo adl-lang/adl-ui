@@ -2,11 +2,11 @@
 import {useState} from 'react'
 
 export interface SelectState {
-  current: string,
+  current: number | null,
   active: boolean,
   choices: string[],
   onClick(): void;
-  onChoice(i: number): void;
+  onChoice(i: number | null): void;
 }
 
 export function useSelectState(initial: number, choices: string[],): SelectState {
@@ -22,7 +22,7 @@ export function useSelectState(initial: number, choices: string[],): SelectState
      setCurrent(i);
   }
   return {
-    current: choices[current],
+    current,
     choices,
     active,
     onClick,

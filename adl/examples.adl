@@ -1,25 +1,27 @@
 module examples {
 
-struct Person {
-  Name name;
-  String role;
-  Word8 age;
-};
-
 struct Name {
   String first;
   String last;
-};
-
-struct Hierarchy {
-  Person leader;
-  Vector<Hierarchy> underlings;
 };
 
 union Gender {
   Void female;
   Void male;
   String other;
+};
+
+struct Person {
+  Name name;
+  Word8 age;
+  Gender gender;
+  String role;
+};
+
+
+struct Hierarchy {
+  Person leader;
+  Vector<Hierarchy> underlings;
 };
 
 };
