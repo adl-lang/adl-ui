@@ -2,10 +2,10 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
-import { TypedFieldState, useTypedFieldState } from "../lib/fields/hooks";
-import {createAdlField} from "../lib/fields/adl";
-import {texprHierarchy, texprPerson} from "../adl-gen/examples";
-import {RESOLVER} from "../adl-gen/resolver";
+import { createAdlField, TypedFieldState, useTypedFieldState } from "@timbod7/adl-ui";
+
+import { texprHierarchy, texprPerson } from "../adl-gen/examples";
+import { RESOLVER } from "../adl-gen/resolver";
 
 storiesOf("Adl Fields", module)
   .add("Person", () => {
@@ -17,17 +17,17 @@ storiesOf("Adl Fields", module)
     const f = createAdlField(texprHierarchy(), RESOLVER);
     const fs = useTypedFieldState(f);
     return renderTypedTextArea(fs);
-  })
- 
+  });
+
 /** Render a typed multiline text area */
 function renderTypedTextArea<T>(fs: TypedFieldState<T>) {
-  const validationError =  fs.validationError();
+  const validationError = fs.validationError();
   const errlabel = validationError !== "" ? <StyledError>{validationError}</StyledError> : null;
   return (
-  <div>
-    <StyledTextArea rows={10} cols={40} value={fs.text} onChange={ev => fs.setText(ev.target.value)}/>
-    {errlabel}
-  </div>
+    <div>
+      <StyledTextArea rows={10} cols={40} value={fs.text} onChange={ev => fs.setText(ev.target.value)} />
+      {errlabel}
+    </div>
   );
 }
 
@@ -38,7 +38,7 @@ font-size: 14px;
 font-family: sans-serif;
 border-radius: 4px;
 `;
-  
+
 const StyledError = styled.div`
 padding-left: calc(2* 8px);
 font-family: sans-serif;

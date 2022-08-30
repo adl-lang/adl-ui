@@ -44,6 +44,7 @@ export interface Factory {
   renderStructEditor(props: StructEditorProps): Rendered;
   renderUnionEditor(props: UnionEditorProps): Rendered;
   renderVoidEditor(): Rendered;
+  renderNullableEditor?(props: FieldEditorProps): Rendered;
 
   renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered;
 }

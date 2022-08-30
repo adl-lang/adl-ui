@@ -2,7 +2,7 @@
 import styled  from 'styled-components';
 import { storiesOf } from '@storybook/react';
 import React from 'react'
-import { useSelectState, SelectState } from "../lib/select";
+import { useSelectState, SelectState } from "@timbod7/adl-ui";
 
 storiesOf("Selects", module)
   .add("Basic", () =>  {

@@ -2,8 +2,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
-import { TypedFieldState, useTypedFieldState } from "../lib/fields/hooks";
-import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../lib/fields/primitive";
+import { TypedFieldState, useTypedFieldState } from "@timbod7/adl-ui";
+import { STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD } from "@timbod7/adl-ui";
 
 storiesOf("Primitive Fields", module)
   .add("String", () => {
@@ -19,7 +19,7 @@ storiesOf("Primitive Fields", module)
     return renderTypedField(fs);
   })
   .add("Integer (1-5)", () => {
-    const fs = useTypedFieldState(intFieldFns(1,5));
+    const fs = useTypedFieldState(intFieldFns(1, 5));
     return renderTypedField(fs);
   })
   .add("Json", () => {
@@ -28,7 +28,7 @@ storiesOf("Primitive Fields", module)
   })
   .add("Simple Form", () => {
     const name = useTypedFieldState(NON_EMPTY_STRING_FIELD);
-    const age = useTypedFieldState(intFieldFns(1,120));
+    const age = useTypedFieldState(intFieldFns(1, 120));
 
     let message = "content ok";
     if (!name.isValid()) {
@@ -53,29 +53,29 @@ storiesOf("Primitive Fields", module)
 
 /** Render a typed field with any validation error */
 function renderTypedField<T>(fs: TypedFieldState<T>) {
-  const validationError =  fs.validationError();
+  const validationError = fs.validationError();
   const errlabel = validationError !== "" ? <StyledError>{validationError}</StyledError> : null;
   return (
-  <div>
-    <StyledInput value={fs.text} onChange={ev => fs.setText(ev.target.value)}/>
-    {errlabel}
-  </div>
+    <div>
+      <StyledInput value={fs.text} onChange={ev => fs.setText(ev.target.value)} />
+      {errlabel}
+    </div>
   );
 }
 /** Render a typed multiline text area */
 function renderTypedTextArea<T>(fs: TypedFieldState<T>) {
-  const validationError =  fs.validationError();
+  const validationError = fs.validationError();
   const errlabel = validationError !== "" ? <StyledError>{validationError}</StyledError> : null;
   return (
-  <div>
-    <StyledTextArea rows={10} cols={40} value={fs.text} onChange={ev => fs.setText(ev.target.value)}/>
-    {errlabel}
-  </div>
+    <div>
+      <StyledTextArea rows={10} cols={40} value={fs.text} onChange={ev => fs.setText(ev.target.value)} />
+      {errlabel}
+    </div>
   );
 }
 /** Render a raw typed field */
 function renderRawTypedField<T>(fs: TypedFieldState<T>) {
-  return  <StyledInput value={fs.text} onChange={ev => fs.setText(ev.target.value)}/>;
+  return <StyledInput value={fs.text} onChange={ev => fs.setText(ev.target.value)} />;
 }
 
 const StyledInput = styled.input`
@@ -85,7 +85,7 @@ font-size: 14px;
 font-family: sans-serif;
 border-radius: 4px;
 `;
-  
+
 const StyledError = styled.div`
 padding-left: calc(2* 8px);
 font-family: sans-serif;
