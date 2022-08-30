@@ -1,0 +1,6 @@
+# Mark generated code
+/adl-ui/adl-gen/** linguist-generated
+/adl-ui-storybook/src/adl-gen/** linguist-generated
+
+/adl-ui/yarn.lock linguist-generated
+/adl-ui-storybook/package-lock.json linguist-generated
