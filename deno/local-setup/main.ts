@@ -8,7 +8,7 @@ import {
   writeManifest,
 } from "./setuputils.ts";
 
-const DENO = packages.deno("1.18.2");
+const DENO = packages.deno("1.23.4");
 const ADL = packages.adl("1.1.6");
 const NODE = packages.nodejs("16.13.0");
 const YARN = packages.yarn("1.22.15");

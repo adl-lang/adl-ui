@@ -34,7 +34,7 @@ else
 fi
 
 #  Fetch deno if not already downloaded
-denoversion=1.18.2
+denoversion=1.23.4
 release=https://github.com/denoland/deno/releases/download/v$denoversion/deno-$arch.zip
 download=$cachedir/deno-v$denoversion-$arch.zip
 if [ ! -f "$download" ]; then
@@ -51,6 +51,6 @@ if [ ! -f "$localdir/bin/deno" ]; then
 fi
 
 # Now use a deno script to install all other local tooling
-deno run --quiet --unstable --allow-all $reporoot/deno/local-setup/main.ts $localdir
+deno task local-setup
 source $localdir/bin/local-env.sh
 
