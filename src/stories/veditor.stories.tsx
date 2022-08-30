@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 import * as adlrt  from "../adl-gen/runtime/adl";
+import * as adlsys from "../adl-gen/sys/types";
+
 
 import {RESOLVER} from "../adl-gen/resolver";
 import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps} from "../lib/veditor/adlfactory";
@@ -46,8 +48,31 @@ storiesOf("VEditors", module)
   .add("Hierarchy", () => {
     const veditor = createVEditor(adlex.texprHierarchy(), RESOLVER, VEDITOR_FACTORY);
     return renderVEditorStory(veditor);
-  }) 
-
+  })
+  .add("Maybe<String>", () => {
+    const veditor = createVEditor(adlsys.texprMaybe(adlrt.texprString()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  })
+  .add("Maybe<Word32>", () => {
+    const veditor = createVEditor(adlsys.texprMaybe(adlrt.texprWord32()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  })
+  .add("Maybe<Person>", () => {
+    const veditor = createVEditor(adlsys.texprMaybe(adlex.texprPerson()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  })   
+  .add("Nullable<String>", () => {
+    const veditor = createVEditor(adlrt.texprNullable(adlrt.texprString()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  })
+  .add("Nullable<Word32>", () => {
+    const veditor = createVEditor(adlrt.texprNullable(adlrt.texprWord32()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  })
+  .add("Nullable<Person>", () => {
+    const veditor = createVEditor(adlrt.texprNullable(adlex.texprPerson()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor);
+  })   
 function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial?: T): JSX.Element {
   const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const errs = veditor.validate(state);

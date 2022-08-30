@@ -162,8 +162,11 @@ function createVEditor0(
       if (fieldfns !== null  && fieldfns.validate("") !== null) {
         return fieldVEditor(factory, adlTree.typeExpr, nullableField(fieldfns));
       } else {
-        // const underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
-        return unimplementedVEditor(factory, adlTree.typeExpr);
+        // Use a maybe editor for now...
+        const maybeTypeExpr = systypes.texprMaybe({value:details.param.typeExpr});
+        const maybeEditor = createVEditor(maybeTypeExpr, declResolver, factory);
+
+        return mappedVEditor(maybeEditor, maybeFromNullable, nullableFromMaybe);
       }
 
     case "vector": {
@@ -533,7 +536,8 @@ function unionVEditor(
     valueFromState,
     update,
     render
-  };}
+  };
+}
 
 function unimplementedVEditor(factory: Factory, typeExpr: adlast.TypeExpr): UVEditor {
     return {
@@ -658,4 +662,22 @@ function isMaybe(typeExpr: adlast.TypeExpr): boolean {
     );
   }
   return false;
+}
+
+function maybeFromNullable<T>(value: T | null): systypes.Maybe<T> {
+  if (value === null) {
+    return {kind:'nothing'}
+  } else {
+    return {kind: 'just', value}
+  }
+}
+
+// This function only works for types T which don't have null as
+// a value.
+function nullableFromMaybe<T>(value: systypes.Maybe<T>): T | null {
+  if (value.kind === 'just') {
+    return value.value;
+  } else {
+    return null
+  }
 }
