@@ -1,19 +1,23 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "composite": true,
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "module": "ESNext",  
+    "target": "es2019",
+    "module": "esnext",
+    "lib": ["es2019","dom"],
     "sourceMap": true,
     "outDir": "dist",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "tsBuildInfoFile": "build/tsconfig.tsbuildinfo"
   },
   "exclude": [
     "dist",
     "node_modules",
-    "deno",
   ],
 }

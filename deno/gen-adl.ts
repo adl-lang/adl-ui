@@ -10,12 +10,11 @@ async function main() {
   const sysAdlFiles = await globFiles(adlStdLibDir, "**/sys/*.adl");
   const exampleAdlFiles = await globFiles('./adl', '*.adl');
 
-  const tsadldir = "./src/adl-gen";
+  const tsadldir = "./adl-ui/adl-gen";
 
   await genTypescript({
     adlFiles: [
       ...sysAdlFiles,
-      ...exampleAdlFiles,
     ],
     tsStyle: "tsc",
     outputDir: tsadldir,
@@ -26,6 +25,36 @@ async function main() {
     manifest: tsadldir + "/.adl-manifest",
     verbose,
   });
+
+  await genTypescript({
+    adlFiles: [
+      ...sysAdlFiles,
+      ...exampleAdlFiles,
+    ],
+    tsStyle: "tsc",
+    outputDir: "./adl-ui-storybook/src/adl-gen",
+    runtimeDir: "runtime",
+    includeRuntime: true,
+    searchPath: [],
+    includeResolver: true,
+    manifest: "./adl-ui-storybook/src/adl-gen" + "/.adl-manifest",
+    verbose,
+  });
+
+  await genTypescript({
+    adlFiles: [
+      ...sysAdlFiles,
+    ],
+    tsStyle: "tsc",
+    outputDir: "./adl-rt",
+    runtimeDir: "runtime",
+    includeRuntime: true,
+    searchPath: [],
+    includeResolver: true,
+    manifest: "./adl-rt" + "/.adl-manifest",
+    verbose,
+  });
+
 }
 
 main()

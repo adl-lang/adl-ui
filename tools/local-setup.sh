@@ -51,6 +51,6 @@ if [ ! -f "$localdir/bin/deno" ]; then
 fi
 
 # Now use a deno script to install all other local tooling
-deno task local-setup
+$localdir/bin/deno task local-setup
 source $localdir/bin/local-env.sh
 

@@ -1,0 +1,56 @@
+{
+  "name": "@timbod7/adl-rt",
+  "version": "0.0.1",
+  "description": "ADL runtime & standard lib",
+  "exports": {
+    "./runtime/sys/adlast": "./dist/runtime/sys/adlast.js",
+    "./runtime/sys/types": "./dist/runtime/sys/types.js",
+    "./runtime/sys/dynamic": "./dist/runtime/sys/dynamic.js",
+    "./runtime/json": "./dist/runtime/json.js",
+    "./runtime/utils": "./dist/runtime/utils.js",
+    "./runtime/dynamic": "./dist/runtime/dynamic.js",
+    "./runtime/adl": "./dist/runtime/adl.js",
+    "./sys/adlast": "./dist/sys/adlast.js",
+    "./sys/types": "./dist/sys/types.js",
+    "./sys/annotations": "./dist/sys/annotations.js",
+    "./sys/dynamic": "./dist/sys/dynamic.js",
+    "./resolver": "./dist/resolver.js"
+  },
+  "typesVersions": {
+    "*": {
+      "runtime/adl": ["dist/runtime/adl.d.ts"],
+      "runtime/dynamic": ["dist/runtime/dynamic.d.ts"],
+      "runtime/sys/types": ["dist/runtime/sys/types.d.ts"],
+      "runtime/sys/dynamic": ["dist/runtime/sys/dynamic.d.ts"],
+      "runtime/sys/adlast": ["dist/runtime/sys/adlast.d.ts"],
+      "runtime/utils": ["dist/runtime/utils.d.ts"],
+      "runtime/json": ["dist/runtime/json.d.ts"],
+      "sys/types": ["dist/sys/types.d.ts"],
+      "sys/dynamic": ["dist/sys/dynamic.d.ts"],
+      "sys/adlast": ["dist/sys/adlast.d.ts"],
+      "sys/annotations": ["dist/sys/annotations.d.ts"],
+      "resolver": ["dist/resolver.d.ts"]      
+    }
+  },
+  "files": [
+    "/dist"
+  ],
+  "author": "Tim Docker",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "yarn build"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.39",
+    "base64-js": "^1.5.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.5"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}

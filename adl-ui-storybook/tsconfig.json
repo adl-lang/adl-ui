@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "composite": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "jsx": "react",
+    "module": "ESNext",  
+    "sourceMap": true,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@timbod7/adl-rt/*": ["../adl-rt/*"],
+      "@timbod7/adl-ui": ["../adl-ui/index.ts"],
+    },
+    "baseUrl": "."
+  },
+  "references": [
+    {
+      "path": "../adl-rt"
+    },
+    {
+      "path": "../adl-ui"
+    },
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "deno",
+  ],
+}
