@@ -6,29 +6,18 @@
     "strict": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "module": "ESNext",  
+    "target": "es2019",
+    "module": "esnext",
+    "lib": ["es2019","dom"],
     "sourceMap": true,
     "outDir": "dist",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@timbod7/adl-rt/*": ["../adl-rt/*"],
-      "@timbod7/adl-ui": ["../adl-ui/index.ts"],
-    },
-    "baseUrl": "."
+    "tsBuildInfoFile": "build/tsconfig.tsbuildinfo"
   },
-  "references": [
-    {
-      "path": "../adl-rt"
-    },
-    {
-      "path": "../adl-ui"
-    },
-  ],
   "exclude": [
     "dist",
     "node_modules",
-    "deno",
   ],
 }

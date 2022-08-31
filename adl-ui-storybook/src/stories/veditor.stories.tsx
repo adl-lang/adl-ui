@@ -1,16 +1,17 @@
 import { storiesOf } from '@storybook/react';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import * as adlrt from "../adl-gen/runtime/adl";
-import * as adlsys from "../adl-gen/sys/types";
+import * as adlrt from "@timbod7/adl-rt/runtime/adl";
+import * as adlsys from "@timbod7/adl-rt/sys/types";
 import {
   createVEditor, Factory, FieldEditorProps, Rendered,
   StructEditorProps, UnimplementedEditorProps, 
   UnionEditorProps, VEditor
 } from "@timbod7/adl-ui";
+import { typeExprToStringUnscoped } from '@timbod7/adl-rt/runtime/utils';
+
 import * as adlex from '../adl-gen/examples';
 import { RESOLVER } from "../adl-gen/resolver";
-import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
 import { Select } from "./select.stories";
 
 storiesOf("VEditors", module)

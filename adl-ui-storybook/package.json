@@ -1,13 +1,16 @@
 {
-  "name": "@timbod7/adl-ui",
+  "name": "@timbod7/adl-ui-storybook",
   "version": "0.0.1",
   "description": "A user interface toolkit for ADL",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["/dist"],
+  "files": [
+    "/dist"
+  ],
   "author": "Tim Docker",
   "license": "MIT",
   "scripts": {
+    "tscb": "tsc -b",
     "build": "tsc",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
@@ -27,6 +30,7 @@
     "react-dom": "^17.0.2",
     "sb": "^6.4.19",
     "styled-components": "^5.3.3",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
     "tslib": "^2.3.1",
     "typescript": "^4.5.5"
   },

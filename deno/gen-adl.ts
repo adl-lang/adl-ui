@@ -41,6 +41,20 @@ async function main() {
     verbose,
   });
 
+  await genTypescript({
+    adlFiles: [
+      ...sysAdlFiles,
+    ],
+    tsStyle: "tsc",
+    outputDir: "./adl-rt",
+    runtimeDir: "runtime",
+    includeRuntime: true,
+    searchPath: [],
+    includeResolver: true,
+    manifest: "./adl-rt" + "/.adl-manifest",
+    verbose,
+  });
+
 }
 
 main()
