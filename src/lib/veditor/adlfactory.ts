@@ -43,6 +43,7 @@ export interface Factory {
   renderFieldEditor(props: FieldEditorProps): Rendered;
   renderStructEditor(props: StructEditorProps): Rendered;
   renderUnionEditor(props: UnionEditorProps): Rendered;
+  renderMaybeEditor(props: MaybeEditorProps): Rendered;
   renderVoidEditor(): Rendered;
 
   renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered;
@@ -69,6 +70,13 @@ export interface StructFieldProps {
 export interface UnionEditorProps {
   selectState: SelectState,
   veditor: VEditorProps<unknown,unknown,unknown> | null;
+  disabled: boolean;
+}
+
+export interface MaybeEditorProps {
+  isActive: boolean,
+  toggleIsActive: () => void,
+  veditor: VEditorProps<unknown,unknown,unknown>;
   disabled: boolean;
 }
 
@@ -150,10 +158,10 @@ function createVEditor0(
         const fldfns = createFieldForTParam0(adlTree, customContext, factory, declResolver);
         if (fldfns && fldfns.validate("") !== null) {
           return fieldVEditor(factory, adlTree.typeExpr, maybeField(fldfns));
+        } else {
+          return maybeVEditor(factory, declResolver, adlTree, details);
         }
       }
-
-
       return unionVEditor(factory, declResolver, adlTree, details);
     }
 
@@ -162,7 +170,7 @@ function createVEditor0(
       if (fieldfns !== null  && fieldfns.validate("") !== null) {
         return fieldVEditor(factory, adlTree.typeExpr, nullableField(fieldfns));
       } else {
-        // Use a maybe editor for now...
+        // Use a maybe editor
         const maybeTypeExpr = systypes.texprMaybe({value:details.param.typeExpr});
         const maybeEditor = createVEditor(maybeTypeExpr, declResolver, factory);
 
@@ -538,6 +546,99 @@ function unionVEditor(
     render
   };
 }
+
+export interface MaybeState {
+  isActive: boolean,
+  underlying: unknown,
+}
+
+// Show the dropdown
+interface MaybeToggleActive {
+  kind: "toggleActive",
+}
+
+// Update the underlying value
+interface MaybeUpdate {
+  kind: "underlying";
+  event: unknown;
+} 
+
+type MaybeEvent = MaybeToggleActive | MaybeUpdate;
+
+type SomeMaybe = systypes.Maybe<unknown>;
+
+function maybeVEditor(
+  factory: Factory,
+  declResolver: adlrt.DeclResolver,
+  _adlTree: adltree.AdlTree,
+  union: adltree.Union,
+): IVEditor<SomeMaybe, MaybeState, MaybeEvent> {
+
+  const field = union.fields[1];
+  const ctx = {
+    scopedDecl: { moduleName: union.moduleName, decl: union.astDecl },
+    field: field.astField
+  };
+
+  const uveditor = createVEditor0(declResolver, ctx, field.adlTree, factory);
+  const initialState = { isActive:false, underlying: uveditor.initialState};
+
+  function stateFromValue(v: SomeMaybe): MaybeState {
+    if (v.kind == 'nothing') {
+      return initialState;
+    } else {
+      return {isActive: true, underlying: uveditor.stateFromValue(v.value)};
+    }
+  }
+
+  function validate(v: MaybeState): string[] {
+    if (v.isActive) {
+      return uveditor.validate(v.underlying);
+    } else {
+      return [];
+    }
+  }
+
+  function valueFromState(v: MaybeState): SomeMaybe {
+    if (v.isActive) {
+      return {kind:"just", value: uveditor.valueFromState(v.underlying)};
+    } else {
+      return {kind:"nothing"}
+    }
+  }
+
+  function update(state: MaybeState, event: MaybeEvent): MaybeState {
+    switch (event.kind) {
+      case 'toggleActive':
+        return {...state, isActive: !state.isActive};
+      case 'underlying':
+        return {...state, underlying: uveditor.update(state.underlying, event.event)};
+    }
+  }
+
+  function render(state: MaybeState, disabled: boolean, onUpdate: UpdateFn<MaybeEvent>): Rendered {
+    return factory.renderMaybeEditor({
+      isActive:state.isActive,
+      toggleIsActive: () => onUpdate({kind:'toggleActive'}),
+      disabled,
+      veditor : {
+        veditor: uveditor,
+        state: state.underlying,
+        onUpdate: (event: unknown) => onUpdate({kind:'underlying', event})
+      }
+    });
+  }
+
+  return {
+    initialState,
+    stateFromValue,
+    validate,
+    valueFromState,
+    update,
+    render
+  };
+}
+
 
 function unimplementedVEditor(factory: Factory, typeExpr: adlast.TypeExpr): UVEditor {
     return {

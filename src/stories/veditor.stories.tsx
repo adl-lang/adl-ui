@@ -6,11 +6,12 @@ import * as adlsys from "../adl-gen/sys/types";
 
 
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps} from "../lib/veditor/adlfactory";
+import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps} from "../lib/veditor/adlfactory";
 import {  Rendered,  VEditor } from '../lib/veditor/type';
 import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
 import * as adlex from '../adl-gen/examples';
 import { Select } from "./select.stories";
+import { Toggle } from "./toggle.stories";
 
 storiesOf("VEditors", module)
   .add("String", () => {
@@ -77,7 +78,6 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
   const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const errs = veditor.validate(state);
   const elements = veditor.render(state, disabled || false, e => setState((s:unknown) => veditor.update(s,e)));
-  console.log(errs);
   return (
     <Content>
       <Row><HeaderLabel>Value:</HeaderLabel>{elements.beside}</Row>
@@ -136,6 +136,7 @@ const VEDITOR_FACTORY: Factory = {
   renderFieldEditor,
   renderStructEditor,
   renderUnionEditor,
+  renderMaybeEditor,
   renderVoidEditor,
   renderUnimplementedEditor,
 };
@@ -193,6 +194,20 @@ function renderUnionEditor(props: UnionEditorProps): Rendered {
     beside,
     below
   }
+}
+
+function renderMaybeEditor(props: MaybeEditorProps): Rendered {
+
+  const beside = <Toggle disabled={props.disabled} checked={props.isActive} onChange={props.toggleIsActive}/>;
+  if (!props.isActive) {
+    return {beside};
+  }
+  const r = props.veditor.veditor.render(props.veditor.state, props.disabled, props.veditor.onUpdate);
+  const below = <div>{r.beside}{r.below}</div>;
+  return {
+   beside,
+   below
+ }
 }
 
 const StructContent = styled.table`

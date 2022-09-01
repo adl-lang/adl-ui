@@ -4,8 +4,8 @@ import { storiesOf } from '@storybook/react';
 import React from 'react'
 import { useSelectState, SelectState } from "../lib/select";
 
-storiesOf("Selects", module)
-  .add("Basic", () =>  {
+storiesOf("Components", module)
+  .add("Basic Select", () =>  {
     const state = useSelectState(
       0,
       [
@@ -31,9 +31,7 @@ export function Select(props: SelectProps) {
     NO_CHOICE,
     ...state.choices
   ]
-  
-  console.log("labels", labels);
-  
+    
   function onChange(ev: React.ChangeEvent<HTMLSelectElement>) {
     if (ev.target.value === NO_CHOICE) {
       props.state.onChoice(null);
