@@ -6,11 +6,12 @@ import * as systypes from "../../adl-gen/sys/types";
 import * as adltree from "../adl-tree";
 import { createJsonBinding } from '../../adl-gen/runtime/json';
 
-import {IVEditor, UVEditor, UpdateFn, Rendered} from "./type";
+import {IVEditor, UVEditor, VEditor, UpdateFn, Rendered} from "./type";
 import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
 import { SelectState } from "../select";
+import { getAdlTableInfo, Column } from "../adl-table";
 
 /**
  * Construct a VEditor from a a specified ADL type
@@ -44,6 +45,7 @@ export interface Factory {
   renderStructEditor(props: StructEditorProps): Rendered;
   renderUnionEditor(props: UnionEditorProps): Rendered;
   renderMaybeEditor(props: MaybeEditorProps): Rendered;
+  renderVectorEditor(props: VectorEditorProps<unknown>): Rendered;
   renderVoidEditor(): Rendered;
 
   renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered;
@@ -78,6 +80,14 @@ export interface MaybeEditorProps {
   toggleIsActive: () => void,
   veditor: VEditorProps<unknown,unknown,unknown>;
   disabled: boolean;
+}
+
+export interface VectorEditorProps<T> {
+  values: T[];
+  columns: Column<T,string>[];
+  valueVEditor: VEditor<T>;
+  disabled: boolean;
+  splice(start: number, deleteCount: number, values: T[]): void;
 }
 
 export interface VEditorProps<T,S,E> {
@@ -178,7 +188,14 @@ function createVEditor0(
       }
 
     case "vector": {
-      // const _underlyingVEditor = createVEditor0(declResolver,nullContext,  details.param, factory);
+      if (details.param.details().kind == 'struct') {
+        const tableInfo = getAdlTableInfo(declResolver, {value: details.param.typeExpr}, factory.getCustomField);
+        const columns = tableInfo.columns.map(c => c.column);
+        const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
+        return genericVectorVEditor(factory, columns, valueVEditor);
+      }
+
+      // FIXME: solve this for non-struct types.
       return unimplementedVEditor(factory, adlTree.typeExpr);
     }
 
@@ -535,6 +552,73 @@ function unionVEditor(
     }
 
     return factory.renderUnionEditor({selectState,disabled,veditor});
+  }
+
+  return {
+    initialState,
+    stateFromValue,
+    validate,
+    valueFromState,
+    update,
+    render
+  };
+}
+
+interface VectorState<T> {
+  values: T[];
+}
+
+interface VectorSplice<T> {
+  kind: "splice";
+  start: number,
+  deleteCount: number,
+  values: T[];
+}
+
+type VectorEvent<T> = VectorSplice<T>;
+
+type Vector<T> = T[];
+
+export function genericVectorVEditor<T>(
+  factory: Factory,
+  columns: Column<T, string>[],
+  valueVEditor: VEditor<T>,
+): IVEditor<Vector<T>, VectorState<T>, VectorEvent<T>> {
+
+  const initialState = { values:[] };
+
+  function stateFromValue(v: Vector<T>): VectorState<T> {
+    return {values:v};
+  }
+
+  function validate(_state: VectorState<T>): string[] {
+    return [];
+  }
+
+  function valueFromState(state: VectorState<T>): Vector<T> {
+    return state.values;
+  }
+
+  function update(state: VectorState<T>, event: VectorEvent<T>): VectorState<T> {
+    let values = [...state.values];
+    switch (event.kind) {
+      case 'splice':
+        values.splice(event.start, event.deleteCount, ...event.values);
+        break;
+    }
+    return {values};
+  }
+
+
+  function render(state: VectorState<T>, disabled: boolean, onUpdate: UpdateFn<VectorEvent<T>>): Rendered {
+    const props: VectorEditorProps<T> = {
+      values: state.values,
+      disabled,
+      columns,
+      valueVEditor,
+      splice: (start, deleteCount, values) => onUpdate({kind: 'splice', start, deleteCount, values: values as T[]}),
+    };
+    return factory.renderVectorEditor(props);
   }
 
   return {

@@ -82,6 +82,39 @@ export function nullableField<T>(fieldFns: FieldFns<T>): FieldFns<T | null> {
   return newFieldFns;
 }
 
+export function enumField(enumDecl: adlast.Decl, enumUnion: adlast.Union): FieldFns<string> {
+  function isValid(v: string): boolean {
+    for(const f of enumUnion.fields) {
+      if (v === f.name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  return {
+    toText(v: string): string {
+      return v;
+    },
+    validate(v: string): string | null {
+      if (!isValid(v)) {
+        return "must be a " + enumDecl.name;
+      }
+      return null;
+    },
+    fromText(v: string): string {
+      if (!isValid(v)) {
+        throw new Error("must be a " + enumDecl.name);
+      }
+      return v;
+    },
+    equals: (v1, v2) => {
+      return v1 === v2;
+    }
+  };
+}
+
+
 
 /**
  * Construct a field for the specified ADL type, editing the values

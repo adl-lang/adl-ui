@@ -6,12 +6,14 @@ import * as adlsys from "../adl-gen/sys/types";
 
 
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor, Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps} from "../lib/veditor/adlfactory";
+import {createVEditor, genericVectorVEditor, Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext} from "../lib/veditor/adlfactory";
+import {Column, cellContent} from "../lib/adl-table";
 import {  Rendered,  VEditor } from '../lib/veditor/type';
-import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
+import { typeExprToStringUnscoped, typeExprsEqual } from '../adl-gen/runtime/utils';
 import * as adlex from '../adl-gen/examples';
 import { Select } from "./select.stories";
 import { Toggle } from "./toggle.stories";
+import { CellContent } from '../lib/adl-table';
 
 storiesOf("VEditors", module)
   .add("String", () => {
@@ -73,7 +75,74 @@ storiesOf("VEditors", module)
   .add("Nullable<Person>", () => {
     const veditor = createVEditor(adlrt.texprNullable(adlex.texprPerson()), RESOLVER, VEDITOR_FACTORY);
     return renderVEditorStory(veditor);
+  })
+  .add("Vector<Name>", () => {
+    const initial: adlex.Name[] = [
+      {first:"Bart", last:"Simpson"},
+      {first:"Lisa", last:"Simpson"},
+    ];
+    const veditor = createVEditor(adlrt.texprVector(adlex.texprName()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor, false, initial);
   })   
+  .add("Vector<Gender>", () => {
+    const initial: adlex.Gender[] = [
+       {kind:'male'},
+       {kind:'female'},
+    ];
+    const veditor = createVEditor(adlrt.texprVector(adlex.texprGender()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor, false, initial);
+  })   
+  .add("Vector<Person> (default)", () => {
+    const initial: adlex.Person[] = [
+      {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
+      {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    ];
+    const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, VEDITOR_FACTORY);
+    return renderVEditorStory(veditor, false, initial);
+  })   
+  .add("Vector<Person> (customized)", () => {
+    // Customize the displayed table to show the columns we want.
+    const texpr = adlrt.texprVector(adlex.texprPerson());
+      const factory = {
+       ...VEDITOR_FACTORY,
+      getCustomVEditor(ctx: CustomContext) {
+         if (typeExprsEqual(ctx.typeExpr, texpr.value)) {
+            let columns: Column<adlex.Person, string>[] = [
+               {
+                  header: cellContent("Name"),
+                  id: "name",
+                  content: p => cellContent(p.name.first + " " + p.name.last),
+               },
+               {
+                  header: cellContent("Age"),
+                  id: "age",
+                  content: p => cellContent(p.age + ""),
+               },
+               {
+                  header: cellContent("Role"),
+                  id: "role",
+                  content: p => cellContent(p.role),
+               },
+               {
+                  header: cellContent("Gender"),
+                  id: "gender",
+                  content: p => cellContent(p.gender.kind),
+               },
+            ];
+            const valueVEditor = createVEditor(adlex.texprPerson(), RESOLVER, VEDITOR_FACTORY);
+            return genericVectorVEditor(factory, columns, valueVEditor);
+         }
+         return null;
+      },
+    }
+    const initial: adlex.Person[] = [
+      {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
+      {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    ];
+    const veditor = createVEditor(texpr, RESOLVER, factory);
+    return renderVEditorStory(veditor, false, initial);
+  })   
+
 function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial?: T): JSX.Element {
   const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const errs = veditor.validate(state);
@@ -100,6 +169,7 @@ const Row = styled.div`
 display: flex;
 flex-direction: row;
 align-items: center;
+margin-bottom: 5px;
 `;
 
 const HeaderLabel = styled.div`
@@ -138,6 +208,7 @@ const VEDITOR_FACTORY: Factory = {
   renderUnionEditor,
   renderMaybeEditor,
   renderVoidEditor,
+  renderVectorEditor,
   renderUnimplementedEditor,
 };
 
@@ -209,6 +280,54 @@ function renderMaybeEditor(props: MaybeEditorProps): Rendered {
    below
  }
 }
+
+function renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered {
+  const headers = props.columns.map((c) => {
+    return <TH>{renderContent(c.header)}</TH>;
+  });
+  const rows = props.values.map((v,i) => {
+    const row = props.columns.map( (c) => {
+      return <TD>{renderContent(c.content(v,i))}</TD>;
+    });
+    return <TR>{row}</TR>;
+  });
+  const below = (
+    <Table>
+      <THead><TR>{headers}</TR></THead>
+      <TBody>{rows}</TBody>
+    </Table>
+  );
+  return {below};
+}
+
+function renderContent(content: CellContent) {
+  return content && content.value;
+}
+
+const Table = styled.table`
+   border: 1px solid;
+   border-collapse: collapse;
+`;
+
+const THead = styled.thead`
+   background: lightgray;
+`;
+
+const TBody = styled.tbody``;
+
+const TR = styled.tr`
+   border: 1px solid;
+`;
+
+const TD = styled.td`
+   padding: 8px;
+`;
+
+const TH = styled.th`
+   padding: 8px;
+`;
+
+
 
 const StructContent = styled.table`
   border-collapse: collapse;
