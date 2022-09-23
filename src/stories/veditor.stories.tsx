@@ -42,6 +42,10 @@ storiesOf("VEditors", module)
     const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
     return renderVEditorStory(veditor);
   }) 
+  .add("Article", () => {
+    const veditor = createVEditor(adlex.texprArticle(), RESOLVER, new UiFactory());
+    return renderVEditorStory(veditor);
+  }) 
   .add("Gender", () => {
     const veditor = createVEditor(adlex.texprGender(), RESOLVER, new UiFactory());
     return renderVEditorStory(veditor);
@@ -86,8 +90,17 @@ storiesOf("VEditors", module)
     const initial: adlex.Gender[] = [
        {kind:'male'},
        {kind:'female'},
+       {kind:'other', value: 'unspecified'},
     ];
     const veditor = createVEditor(adlrt.texprVector(adlex.texprGender()), RESOLVER, new UiFactory());
+    return renderVEditorStory(veditor, false, initial);
+  })   
+  .add("Vector<Article>", () => {
+    const initial: adlex.Article[] = [
+     'definite',
+     'indefinite',
+    ];
+    const veditor = createVEditor(adlrt.texprVector(adlex.texprArticle()), RESOLVER, new UiFactory());
     return renderVEditorStory(veditor, false, initial);
   })   
   .add("Vector<Person> (default)", () => {
@@ -149,7 +162,7 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
       {elements.below}
       <hr/>
       {errs.length === 0 
-         ? <Valid>Value:<br/><br/>{JSON.stringify(veditor.valueFromState(state), null, 2)}</Valid>
+         ? <Valid>Typescript value:<br/><br/>{JSON.stringify(veditor.valueFromState(state), null, 2)}</Valid>
          : <Errors>Errors:<br/><br/>{errs.join("\n")}</Errors>
       }
     </Content>

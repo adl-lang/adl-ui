@@ -18,6 +18,10 @@ struct Person {
   String role;
 };
 
+union Article {
+  Void definite;
+  Void indefinite;
+};
 
 struct Hierarchy {
   Person leader;

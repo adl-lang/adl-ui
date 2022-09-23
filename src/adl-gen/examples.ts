@@ -90,6 +90,18 @@ export function texprPerson(): ADL.ATypeExpr<Person> {
   return {value : {typeRef : {kind: "reference", value : snPerson}, parameters : []}};
 }
 
+export type Article = 'definite' | 'indefinite';
+export const valuesArticle : Article[] = ['definite', 'indefinite'];
+
+const Article_AST : ADL.ScopedDecl =
+  {"moduleName":"examples","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"definite","default":{"kind":"nothing"},"name":"definite","typeExpr":{"typeRef":{"kind":"primitive","value":"Void"},"parameters":[]}},{"annotations":[],"serializedName":"indefinite","default":{"kind":"nothing"},"name":"indefinite","typeExpr":{"typeRef":{"kind":"primitive","value":"Void"},"parameters":[]}}]}},"name":"Article","version":{"kind":"nothing"}}};
+
+export const snArticle: ADL.ScopedName = {moduleName:"examples", name:"Article"};
+
+export function texprArticle(): ADL.ATypeExpr<Article> {
+  return {value : {typeRef : {kind: "reference", value : snArticle}, parameters : []}};
+}
+
 export interface Hierarchy {
   leader: Person;
   underlings: Hierarchy[];
@@ -120,5 +132,6 @@ export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {
   "examples.Name" : Name_AST,
   "examples.Gender" : Gender_AST,
   "examples.Person" : Person_AST,
+  "examples.Article" : Article_AST,
   "examples.Hierarchy" : Hierarchy_AST
 };

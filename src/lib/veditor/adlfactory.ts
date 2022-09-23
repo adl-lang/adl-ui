@@ -11,7 +11,7 @@ import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
 import { SelectState } from "../select";
-import { getAdlTableInfo, Column } from "../adl-table";
+import { getAdlTableInfo, Column, cellContent } from "../adl-table";
 
 /**
  * Construct a VEditor from a a specified ADL type
@@ -174,7 +174,16 @@ function createVEditor0(
           return maybeVEditor(factory, declResolver, adlTree, details);
         }
       }
-      return unionVEditor(factory, declResolver, adlTree, details);
+      else {
+        const uveditor = unionVEditor(factory, declResolver, adlTree, details);
+        if (isEnum(details.fields)) {
+          // The union editor works fine for enums, but we need to map to the 
+          // enum typescript representation
+          return mappedVEditor(uveditor, unionFromEnum, enumFromUnion);
+        } else {
+          return uveditor;
+        }
+      }
     }
 
     case "nullable":
@@ -190,11 +199,36 @@ function createVEditor0(
       }
 
     case "vector": {
-      if (details.param.details().kind == 'struct') {
+      const udetails = details.param.details(); 
+      if (udetails.kind == 'struct') {
         const tableInfo = getAdlTableInfo(declResolver, {value: details.param.typeExpr}, ctx => factory.getCustomField(ctx));
         const columns = tableInfo.columns.map(c => c.column);
         const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
         return genericVectorVEditor(factory, columns, valueVEditor);
+
+      } else if (udetails.kind == 'union') {
+          // The default view for a vector of unions is to just show the discriminator
+        if (isEnum(udetails.fields)) {
+          let columns: Column<string, string>[] = [
+             {
+                header: cellContent(udetails.astDecl.name),
+                id: "kind",
+                content: v => cellContent(v),
+             },
+          ];
+          const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
+          return genericVectorVEditor(factory, columns, valueVEditor);
+        } else {
+          let columns: Column<{kind:string}, string>[] = [
+             {
+                header: cellContent(`${udetails.astDecl.name}`),
+                id: "kind",
+                content: v => cellContent(v.kind),
+             },
+          ];
+          const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
+          return genericVectorVEditor(factory, columns, valueVEditor);
+        }
       }
 
       // FIXME: solve this for non-struct types.
@@ -868,3 +902,12 @@ function nullableFromMaybe<T>(value: systypes.Maybe<T>): T | null {
     return null
   }
 }
+
+function unionFromEnum(ev : string): {kind:string, value:unknown} {
+  return {kind:ev, value:null};
+}
+
+function enumFromUnion(uv: {kind:string, value:unknown}) : string {
+  return uv.kind;
+}
+
