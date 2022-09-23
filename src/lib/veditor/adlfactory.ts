@@ -87,7 +87,7 @@ export interface MaybeEditorProps {
 export interface VectorEditorProps<T> {
   values: T[];
   columns: Column<T,string>[];
-  valueVEditor: VEditor<T>;
+  valueVEditor(): VEditor<T>;
   disabled: boolean;
   splice(start: number, deleteCount: number, values: T[]): void;
 }
@@ -200,10 +200,10 @@ function createVEditor0(
 
     case "vector": {
       const udetails = details.param.details(); 
+      const valueVEditor = () => createVEditor0(declResolver, ctx, details.param, factory);
       if (udetails.kind == 'struct') {
         const tableInfo = getAdlTableInfo(declResolver, {value: details.param.typeExpr}, ctx => factory.getCustomField(ctx));
         const columns = tableInfo.columns.map(c => c.column);
-        const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
         return genericVectorVEditor(factory, columns, valueVEditor);
 
       } else if (udetails.kind == 'union') {
@@ -216,7 +216,6 @@ function createVEditor0(
                 content: v => cellContent(v),
              },
           ];
-          const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
           return genericVectorVEditor(factory, columns, valueVEditor);
         } else {
           let columns: Column<{kind:string}, string>[] = [
@@ -226,7 +225,6 @@ function createVEditor0(
                 content: v => cellContent(v.kind),
              },
           ];
-          const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
           return genericVectorVEditor(factory, columns, valueVEditor);
         }
       }
@@ -618,7 +616,7 @@ type Vector<T> = T[];
 export function genericVectorVEditor<T>(
   factory: Factory,
   columns: Column<T, string>[],
-  valueVEditor: VEditor<T>,
+  valueVEditor: () => VEditor<T>,
 ): IVEditor<Vector<T>, VectorState<T>, VectorEvent<T>> {
 
   const initialState = { values:[] };
