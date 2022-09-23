@@ -2,6 +2,9 @@
 import React from 'react'
 import styled from 'styled-components';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEdit, faTrash, faArrowUp, faArrowDown, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
+
 import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../lib/veditor/adlfactory";
 import {FieldFns} from "../lib/fields/type";
 import {  Rendered,  VEditor } from '../lib/veditor/type';
@@ -85,6 +88,23 @@ export class UiFactory implements Factory {
   }
   
   renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered {
+
+    function deleteItem(i: number) {
+      props.splice(i, 1, []);
+    }
+    
+    function moveItemUp(i: number) {
+      props.splice(i-1, 2, [props.values[i], props.values[i-1]]);
+    }
+    
+    function moveItemDown(i: number) {
+      props.splice(i, 2, [props.values[i+1], props.values[i]]);
+    }
+
+    function iconColor(enabled: boolean): string {
+      return enabled ? "black" : "lightGrey"
+    }
+
     const headers = props.columns.map((c) => {
       return <TH key={c.id}>{this.renderContent(c.header)}</TH>;
     });
@@ -92,11 +112,24 @@ export class UiFactory implements Factory {
       const row = props.columns.map( (c) => {
         return <TD key={c.id}>{this.renderContent(c.content(v,i))}</TD>;
       });
-      return <TR key={i.toString()}>{row}</TR>;
+      
+      const canMoveUp = i > 0;
+      const canMoveDown = i < props.values.length - 1;
+      
+      const controls = (
+        <RowControls>
+          <FontAwesomeIcon icon={faEdit} />
+          <FontAwesomeIcon icon={faCirclePlus} />
+          <FontAwesomeIcon icon={faArrowUp} color={iconColor(canMoveUp)} onClick={() => canMoveUp && moveItemUp(i)}/>
+          <FontAwesomeIcon icon={faArrowDown} color={iconColor(canMoveDown)} onClick={() => canMoveDown && moveItemDown(i)}/>
+          <FontAwesomeIcon icon={faTrash} onClick={() => deleteItem(i)}/>
+        </RowControls>
+      );
+      return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
     });
     const below = (
       <Table>
-        <THead><TR>{headers}</TR></THead>
+      <THead><TR>{headers}<TH></TH></TR></THead>
         <TBody>{rows}</TBody>
       </Table>
     );
@@ -166,12 +199,10 @@ font-size: 14px;
 color: #b71c1c;
 `;
 
-
-
-
 const Table = styled.table`
    border: 1px solid;
    border-collapse: collapse;
+   text-align: left;
 `;
 
 const THead = styled.thead`
@@ -191,6 +222,12 @@ const TD = styled.td`
 const TH = styled.th`
    padding: 8px;
 `;
+
+const RowControls = styled.div`
+   display: flex;
+   flex-direction: row;
+   gap: 5px;
+`
 
 
 
