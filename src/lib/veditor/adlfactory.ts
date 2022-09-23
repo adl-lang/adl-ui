@@ -36,6 +36,8 @@ export interface CustomContext {
   typeExpr: adlast.TypeExpr;
 }
 
+export type VEditorCustomize = (ctx: CustomContext) => UVEditor | null;
+export type FieldCustomize = (ctx: CustomContext) => FieldFns<unknown> | null;
 
 export interface Factory {
   getCustomVEditor(ctx: CustomContext): UVEditor | null;
@@ -189,7 +191,7 @@ function createVEditor0(
 
     case "vector": {
       if (details.param.details().kind == 'struct') {
-        const tableInfo = getAdlTableInfo(declResolver, {value: details.param.typeExpr}, factory.getCustomField);
+        const tableInfo = getAdlTableInfo(declResolver, {value: details.param.typeExpr}, ctx => factory.getCustomField(ctx));
         const columns = tableInfo.columns.map(c => c.column);
         const valueVEditor = createVEditor0(declResolver, ctx, details.param, factory);
         return genericVectorVEditor(factory, columns, valueVEditor);
