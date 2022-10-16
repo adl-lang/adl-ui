@@ -20,6 +20,8 @@ export function Toggle(props: ToggleProps) {
 
 const CheckBoxWrapper = styled.div`
   position: relative;
+  width: 42px;
+  height: 26px;
 `;
 
 const CheckBoxLabel = styled.label`

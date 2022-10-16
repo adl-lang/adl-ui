@@ -189,13 +189,10 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
   let rawToggle: JSX.Element | null = null;
   if (state.jsonBinding) {
     rawToggle = (
-      <span>
       <Toggle
         onChange={onToggleMode}
         checked={state.mode === Mode.RAW}
       />
-      Edit Raw
-      </span>
     );
   }
 
@@ -215,10 +212,17 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
       <div>
         <div style={{ margin: "20px" }}>{renderedEditor}</div>
         {formError}
-        <div style={{ margin: "20px" }}>
-          {buttons}
-          {rawToggle}
-        </div>
+        <ActionBar>
+          <ActionGroup>
+            {buttons}
+          </ActionGroup>
+          { rawToggle &&
+            <ActionGroup>
+              <span>Edit raw</span>
+              {rawToggle}
+            </ActionGroup>
+          }
+        </ActionBar>
       </div>
     </div>
   );
@@ -228,6 +232,20 @@ const ErrLabel = styled.label`
   color: red;
 `;
 
+const ActionBar = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`
+
+const ActionGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+`
+
 const RawJsonEditor = (props: {
   disabled?: boolean,
   value: string,
@@ -235,6 +253,7 @@ const RawJsonEditor = (props: {
 }) =>  {
   return <textarea
     rows={20}
+    cols={80}
     disabled={props.disabled}
     value={props.value}
     onChange={ev => props.onChange(ev.target.value)}
