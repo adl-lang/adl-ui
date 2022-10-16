@@ -11,7 +11,7 @@ import {Column, cellContent} from "../lib/adl-table";
 import { VEditor } from '../lib/veditor/type';
 import { typeExprsEqual } from '../adl-gen/runtime/utils';
 import * as adlex from '../adl-gen/examples';
-import { UiFactory } from "./ui-factory";
+import { UiFactory } from "./ui/factory";
 
 storiesOf("VEditors", module)
   .add("String", () => {
@@ -140,7 +140,7 @@ storiesOf("VEditors", module)
            },
         ];
         const valueVEditor = createVEditor(adlex.texprPerson(), RESOLVER, factory);
-        return genericVectorVEditor(factory, columns, valueVEditor);
+        return genericVectorVEditor(factory, columns, () => valueVEditor);
       }
       return null;
     });

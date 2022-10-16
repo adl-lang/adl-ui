@@ -5,13 +5,13 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash, faArrowUp, faArrowDown, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 
-import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../lib/veditor/adlfactory";
-import {FieldFns} from "../lib/fields/type";
-import {  Rendered,  VEditor } from '../lib/veditor/type';
-import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
-import { Select } from "./select.stories";
-import { Toggle } from "./toggle.stories";
-import { CellContent } from '../lib/adl-table';
+import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../../lib/veditor/adlfactory";
+import {FieldFns} from "../../lib/fields/type";
+import {  Rendered,  VEditor } from '../../lib/veditor/type';
+import { typeExprToStringUnscoped } from '../../adl-gen/runtime/utils';
+import { Select } from "../ui/select";
+import { Toggle } from "../ui/toggle";
+import { CellContent } from '../../lib/adl-table';
 
 
 export class UiFactory implements Factory {
@@ -41,13 +41,13 @@ export class UiFactory implements Factory {
       const rendered = fd.veditor.veditor.render(fd.veditor.state, props.disabled, fd.veditor.onUpdate);
       return (
         <>
-        <tr key={fd.name}>
+        <tr key={"1_" + fd.name}>
           <StructFieldLabel>
             <label>{label}</label>
           </StructFieldLabel>
           {rendered.beside && <StructFieldBeside>{rendered.beside}</StructFieldBeside>}
         </tr>
-        {rendered.below && <StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow>}
+        {rendered.below && <tr key = {"2_" + fd.name}><StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow></tr>}
         </>
       );
     });
@@ -89,6 +89,13 @@ export class UiFactory implements Factory {
   
   renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered {
 
+    interface ModalState<T, S> {
+      veditorState: S,
+      onApply: (value: T) => void,
+    }
+
+    const [modalState,setModalState] = React.useState<ModalState<unknown,unknown>| undefined>();
+
     function deleteItem(i: number) {
       props.splice(i, 1, []);
     }
@@ -127,11 +134,17 @@ export class UiFactory implements Factory {
       );
       return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
     });
+
+    const modal = undefined;
+
     const below = (
-      <Table>
-      <THead><TR>{headers}<TH></TH></TR></THead>
-        <TBody>{rows}</TBody>
-      </Table>
+      <div>
+        {modal}
+        <Table>
+          <THead><TR>{headers}<TH></TH></TR></THead>
+          <TBody>{rows}</TBody>
+        </Table>
+      </div>
     );
     return {below};
   }
@@ -174,7 +187,6 @@ export class UiFactory implements Factory {
     }
     return null;
   }
-
 }
 
 const Row = styled.div`
@@ -183,7 +195,6 @@ flex-direction: row;
 align-items: center;
 margin-bottom: 5px;
 `;
-
 const StyledInput = styled.input`
 padding: 8px;
 border: 1px solid #000;
