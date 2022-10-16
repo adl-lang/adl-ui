@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { TypedFieldState, useTypedFieldState } from "../lib/fields/hooks";
 import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../lib/fields/primitive";
 
-storiesOf("Primitive Fields", module)
+storiesOf("Fields", module)
   .add("String", () => {
     const fs = useTypedFieldState(STRING_FIELD);
     return renderTypedField(fs);

@@ -7,13 +7,13 @@ import {createAdlField} from "../lib/fields/adl";
 import {texprHierarchy, texprPerson} from "../adl-gen/examples";
 import {RESOLVER} from "../adl-gen/resolver";
 
-storiesOf("Adl Fields", module)
-  .add("Person", () => {
+storiesOf("Fields", module)
+  .add("JSON - Person", () => {
     const f = createAdlField(texprPerson(), RESOLVER);
     const fs = useTypedFieldState(f);
     return renderTypedTextArea(fs);
   })
-  .add("Hierarchy", () => {
+  .add("JSON - Hierarchy", () => {
     const f = createAdlField(texprHierarchy(), RESOLVER);
     const fs = useTypedFieldState(f);
     return renderTypedTextArea(fs);
