@@ -12,6 +12,9 @@ import { typeExprToStringUnscoped } from '../../adl-gen/runtime/utils';
 import { Select } from "../ui/select";
 import { Toggle } from "../ui/toggle";
 import { CellContent } from '../../lib/adl-table';
+import { AdlFormState, createAdlFormState } from '../../lib/form';
+import { AdlForm } from './form';
+import { Modal } from './modal';
 
 
 export class UiFactory implements Factory {
@@ -89,12 +92,14 @@ export class UiFactory implements Factory {
   
   renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered {
 
-    interface ModalState<T, S> {
-      veditorState: S,
-      onApply: (value: T) => void,
-    }
+    interface ModalState {
+        onApply: (value: T) => void;
+    };
 
-    const [modalState,setModalState] = React.useState<ModalState<unknown,unknown>| undefined>();
+    const formState = createAdlFormState({
+      veditor: props.valueVEditor(),
+    });
+    const [modalState,setModalState] = React.useState<ModalState| undefined>();
 
     function deleteItem(i: number) {
       props.splice(i, 1, []);
@@ -112,6 +117,40 @@ export class UiFactory implements Factory {
       return enabled ? "black" : "lightGrey"
     }
 
+    function insertItemAfter(i: number) {
+      formState.setValue0(undefined);
+      setModalState({
+        onApply: (t:T) => {
+          props.splice(i+1, 0, [t]);
+          setModalState(undefined);
+      }})
+    }
+
+    function editItem(i: number) {
+      formState.setValue0(props.values[i]);
+      setModalState({
+        onApply: (t:T) => {
+          props.splice(i, 1, [t]);
+          setModalState(undefined);
+      }})
+    }
+
+    function renderModal() : JSX.Element | undefined {
+      if (modalState) {
+        return (
+          <Modal onClickBackground={() => setModalState(undefined)}>
+            <AdlForm
+            state={formState}
+            onApply={v => {
+              modalState.onApply(v as T)
+            }}
+            onCancel={() => setModalState(undefined)}
+            />
+          </Modal>
+        );
+      }
+    }
+
     const headers = props.columns.map((c) => {
       return <TH key={c.id}>{this.renderContent(c.header)}</TH>;
     });
@@ -125,8 +164,8 @@ export class UiFactory implements Factory {
       
       const controls = (
         <RowControls>
-          <FontAwesomeIcon icon={faEdit} />
-          <FontAwesomeIcon icon={faCirclePlus} />
+          <FontAwesomeIcon icon={faEdit} onClick={() => editItem(i)}/>
+          <FontAwesomeIcon icon={faCirclePlus} onClick={() => insertItemAfter(i)}/>
           <FontAwesomeIcon icon={faArrowUp} color={iconColor(canMoveUp)} onClick={() => canMoveUp && moveItemUp(i)}/>
           <FontAwesomeIcon icon={faArrowDown} color={iconColor(canMoveDown)} onClick={() => canMoveDown && moveItemDown(i)}/>
           <FontAwesomeIcon icon={faTrash} onClick={() => deleteItem(i)}/>
@@ -135,7 +174,7 @@ export class UiFactory implements Factory {
       return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
     });
 
-    const modal = undefined;
+    const modal = renderModal();
 
     const below = (
       <div>

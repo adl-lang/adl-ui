@@ -65,19 +65,25 @@ export function createAdlFormState<T>(params: {
 
   const [value0, _setValue0] = useState<T|undefined>(params.value0);
   const [pristine, setPristine] = useState<boolean>(true);
-  const [veditorState, _setVEditorState] = useState<unknown>(() => {
-    return params.value0 === undefined
-     ? params.veditor.initialState
-     : params.veditor.stateFromValue(params.value0);
-  });
-  const [rawState, _setRawState] = useState<string>(() => {
-    return params.jsonBinding && params.value0 != undefined ? JSON.stringify(params.jsonBinding.toJson(params.value0), null, 2) : ""
-  });
+  const [veditorState, _setVEditorState] = useState<unknown>(() => makeVeditorState(params.value0));
+  const [rawState, _setRawState] = useState<string>(() => makeRawState(params.value0));
   const [mode, setMode] = useState<Mode>(Mode.VE);
   const [formValidation, _setFormValidation] = useState<FormValidation>({type: "ok",validationSeq: 0});
 
+  function makeVeditorState(v: T | undefined): unknown {
+    return v === undefined
+    ? params.veditor.initialState
+    : params.veditor.stateFromValue(v);
+  }
+
+  function makeRawState(v: T | undefined): string {
+    return params.jsonBinding && v != undefined ? JSON.stringify(params.jsonBinding.toJson(v), null, 2) : ""
+  }
+
   function setValue0(v: T | undefined) {
     _setValue0(v);
+    _setVEditorState(makeVeditorState(v));
+    _setRawState(makeRawState(v));
     setPristine(true);
   } 
 
