@@ -35,8 +35,6 @@ export function Select(props: SelectProps) {
 }
 
 const StyledSelect = styled.select`
-  font-size: 14px;
-  font-family: sans-serif;
   border: none;
   background-color: white;
 `;

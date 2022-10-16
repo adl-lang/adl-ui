@@ -34,22 +34,16 @@ function renderTypedTextArea<T>(fs: TypedFieldState<T>) {
 const StyledInput = styled.input`
 padding: 8px;
 border: 1px solid #000;
-font-size: 14px;
-font-family: sans-serif;
 border-radius: 4px;
 `;
   
 const StyledError = styled.div`
 padding-left: calc(2* 8px);
-font-family: sans-serif;
-font-size: 14px;
 color: #b71c1c;
 `;
 
 const StyledTextArea = styled.textarea`
 padding: 8px;
 border: 1px solid #000;
-font-size: 14px;
-font-family: sans-serif;
 border-radius: 4px;
 `;

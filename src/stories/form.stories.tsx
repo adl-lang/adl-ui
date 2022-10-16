@@ -7,6 +7,8 @@ import { UiFactory } from "./ui/factory";
 import { AdlFormState, createAdlFormState } from '../lib/form';
 import { AdlForm } from './ui/form';
 import { createJsonBinding } from '../adl-gen/runtime/json';
+import { GlobalStyle } from './ui/style';
+import React from 'react';
 
 storiesOf("Forms", module)
 .add("Person (empty)", () => {

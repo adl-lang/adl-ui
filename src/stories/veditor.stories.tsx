@@ -170,8 +170,6 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
 }
 
 const Content = styled.div`
-  font-size: 14px;
-  font-family: sans-serif;
 `;
 
 const Row = styled.div`
@@ -197,15 +195,11 @@ color: #b71c1c;
 const StyledInput = styled.input`
 padding: 8px;
 border: 1px solid #000;
-font-size: 14px;
-font-family: sans-serif;
 border-radius: 4px;
 `;
   
 const StyledError = styled.div`
 padding-left: calc(2* 8px);
-font-family: sans-serif;
-font-size: 14px;
 color: #b71c1c;
 `;
 

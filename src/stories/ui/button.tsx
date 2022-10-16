@@ -11,8 +11,6 @@ const LOADING_SPIN = keyframes`
 `;
 export const Button = styled.button<ButtonProps>`
   //default styles
-  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  font-size: 1rem;
   font-weight: ${props => style(props).fontWeight};
   color: ${props => color(props, 'normal')};
   background-color: ${props => bgcolor(props,'normal')};
