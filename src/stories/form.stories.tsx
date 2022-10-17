@@ -9,6 +9,7 @@ import { AdlForm } from './ui/form';
 import { createJsonBinding } from '../adl-gen/runtime/json';
 import { GlobalStyle } from './ui/style';
 import React from 'react';
+import { customizedHierarchyVector } from './veditor.stories';
 
 storiesOf("Forms", module)
 .add("Person (empty)", () => {
@@ -46,7 +47,37 @@ storiesOf("Forms", module)
   })
   return renderFormStory(state, false);
 })
-
+.add("Hierarchy", () => {
+  const factory = new UiFactory();
+  factory.addCustomVEditor(customizedHierarchyVector(factory)); 
+  const veditor = createVEditor(adlex.texprHierarchy(), RESOLVER, factory);
+  const jsonBinding = createJsonBinding(RESOLVER, adlex.texprHierarchy());
+  const state = createAdlFormState({
+    veditor,
+    jsonBinding,
+    value0: {
+      leader: {
+        name: {first: "Mike", last: "Mechanic"},
+        age: 21,
+        gender: {kind:"male"},
+        role: "boss"
+      },
+      underlings: [
+        {
+          leader: {
+            name: {first: "Dave", last: "Electrician"},
+            age: 42,
+            gender: {kind:"male"},
+            role: "doer"
+          },
+          underlings: [
+          ]
+        }
+      ]
+    }
+  })
+  return renderFormStory(state, false);
+})
 
 function renderFormStory<T>(state: AdlFormState<T>, disabled: boolean): JSX.Element {
   return AdlForm({

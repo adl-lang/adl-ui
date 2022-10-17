@@ -154,6 +154,12 @@ export class UiFactory implements Factory {
     const headers = props.columns.map((c) => {
       return <TH key={c.id}>{this.renderContent(c.header)}</TH>;
     });
+    const hcontrols = (
+      <RowControls>
+        <FontAwesomeIcon icon={faCirclePlus} onClick={() => insertItemAfter(props.values.length - 1)}/>
+      </RowControls>
+    );
+    
     const rows = props.values.map((v,i) => {
       const row = props.columns.map( (c) => {
         return <TD key={c.id}>{this.renderContent(c.content(v,i))}</TD>;
@@ -165,7 +171,6 @@ export class UiFactory implements Factory {
       const controls = (
         <RowControls>
           <FontAwesomeIcon icon={faEdit} onClick={() => editItem(i)}/>
-          <FontAwesomeIcon icon={faCirclePlus} onClick={() => insertItemAfter(i)}/>
           <FontAwesomeIcon icon={faArrowUp} color={iconColor(canMoveUp)} onClick={() => canMoveUp && moveItemUp(i)}/>
           <FontAwesomeIcon icon={faArrowDown} color={iconColor(canMoveDown)} onClick={() => canMoveDown && moveItemDown(i)}/>
           <FontAwesomeIcon icon={faTrash} onClick={() => deleteItem(i)}/>
@@ -180,7 +185,7 @@ export class UiFactory implements Factory {
       <div>
         {modal}
         <Table>
-          <THead><TR>{headers}<TH></TH></TR></THead>
+          <THead><TR>{headers}<TH>{hcontrols}</TH></TR></THead>
           <TBody>{rows}</TBody>
         </Table>
       </div>

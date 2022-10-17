@@ -6,7 +6,7 @@ import * as adlsys from "../adl-gen/sys/types";
 
 
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor, genericVectorVEditor, CustomContext } from "../lib/veditor/adlfactory";
+import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../lib/veditor/adlfactory";
 import {Column, cellContent} from "../lib/adl-table";
 import { VEditor } from '../lib/veditor/type';
 import { typeExprsEqual } from '../adl-gen/runtime/utils';
@@ -51,7 +51,9 @@ storiesOf("VEditors", module)
     return renderVEditorStory(veditor);
   }) 
   .add("Hierarchy", () => {
-    const veditor = createVEditor(adlex.texprHierarchy(), RESOLVER, new UiFactory());
+    const factory = new UiFactory();
+    factory.addCustomVEditor(customizedHierarchyVector(factory)); 
+    const veditor = createVEditor(adlex.texprHierarchy(), RESOLVER, factory);
     return renderVEditorStory(veditor);
   })
   .add("Maybe<String>", () => {
@@ -115,35 +117,7 @@ storiesOf("VEditors", module)
     // Customize the displayed table to include derived columns
     const texpr = adlrt.texprVector(adlex.texprPerson());
     const factory = new UiFactory();
-    factory.addCustomVEditor( (ctx: CustomContext) => {
-      if (typeExprsEqual(ctx.typeExpr, texpr.value)) {
-        let columns: Column<adlex.Person, string>[] = [
-           {
-              header: cellContent("Name"),
-              id: "name",
-              content: p => cellContent(p.name.first + " " + p.name.last),
-           },
-           {
-              header: cellContent("Age"),
-              id: "age",
-              content: p => cellContent(p.age + ""),
-           },
-           {
-              header: cellContent("Role"),
-              id: "role",
-              content: p => cellContent(p.role),
-           },
-           {
-              header: cellContent("Gender"),
-              id: "gender",
-              content: p => cellContent(p.gender.kind),
-           },
-        ];
-        const valueVEditor = createVEditor(adlex.texprPerson(), RESOLVER, factory);
-        return genericVectorVEditor(factory, columns, () => valueVEditor);
-      }
-      return null;
-    });
+    factory.addCustomVEditor(customizedPersonVector(factory)); 
     const initial: adlex.Person[] = [
       {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
       {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
@@ -168,6 +142,64 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
     </Content>
   );
 }
+
+export function customizedPersonVector(factory: Factory): VEditorCustomize {
+  return (ctx: CustomContext) => {
+    const texpr = adlrt.texprVector(adlex.texprPerson());
+    if (typeExprsEqual(ctx.typeExpr, texpr.value)) {
+      let columns: Column<adlex.Person, string>[] = [
+        {
+            header: cellContent("Name"),
+            id: "name",
+            content: p => cellContent(p.name.first + " " + p.name.last),
+        },
+        {
+            header: cellContent("Age"),
+            id: "age",
+            content: p => cellContent(p.age + ""),
+        },
+        {
+            header: cellContent("Role"),
+            id: "role",
+            content: p => cellContent(p.role),
+        },
+        {
+            header: cellContent("Gender"),
+            id: "gender",
+            content: p => cellContent(p.gender.kind),
+        },
+      ];
+      const valueVEditor = createVEditor(adlex.texprPerson(), RESOLVER, factory);
+      return genericVectorVEditor(factory, columns, () => valueVEditor);
+    } else {
+      return null;
+    }
+  }
+}
+export function customizedHierarchyVector(factory: Factory): VEditorCustomize {
+  return (ctx: CustomContext) => {
+    const texpr = adlrt.texprVector(adlex.texprHierarchy());
+    if (typeExprsEqual(ctx.typeExpr, texpr.value)) {
+      let columns: Column<adlex.Hierarchy, string>[] = [
+        {
+            header: cellContent("Leader"),
+            id: "name",
+            content: p => cellContent(p.leader.name.first + " " + p.leader.name.last),
+        },
+        {
+            header: cellContent("Num underlings"),
+            id: "num",
+            content: p => cellContent(p.underlings.length + ""),
+        },
+      ];
+      const valueVEditor = createVEditor(adlex.texprHierarchy(), RESOLVER, factory);
+      return genericVectorVEditor(factory, columns, () => valueVEditor);
+    } else {
+      return null;
+    }
+  }
+}
+
 
 const Content = styled.div`
 `;
