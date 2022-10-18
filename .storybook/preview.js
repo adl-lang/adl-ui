@@ -1,4 +1,4 @@
-import {GlobalStyle} from "../src/stories/ui/style"
+import {GlobalStyle} from "../src/ui/style"
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },

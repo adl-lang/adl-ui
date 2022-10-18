@@ -1,8 +1,8 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react'
-import { useSelectState } from "../lib/select";
-import { Select } from './ui/select';
+import { useSelectState } from "../model/select";
+import { Select } from './select';
 
 storiesOf("Components", module)
   .add("Basic Select", () =>  {

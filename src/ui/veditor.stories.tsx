@@ -6,12 +6,12 @@ import * as adlsys from "../adl-gen/sys/types";
 
 
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../lib/veditor/adlfactory";
-import {Column, cellContent} from "../lib/adl-table";
-import { VEditor } from '../lib/veditor/type';
+import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../model/veditor/adlfactory";
+import {Column, cellContent} from "../model/adl-table";
+import { VEditor } from '../model/veditor/type';
 import { typeExprsEqual } from '../adl-gen/runtime/utils';
 import * as adlex from '../adl-gen/examples';
-import { UiFactory } from "./ui/factory";
+import { UiFactory } from "./factory";
 
 storiesOf("VEditors", module)
   .add("String", () => {

@@ -1,6 +1,6 @@
 import styled  from 'styled-components';
 import React from 'react'
-import { SelectState } from '../../lib/select';
+import { SelectState } from '../model/select';
 
 interface SelectProps {
   state: SelectState,

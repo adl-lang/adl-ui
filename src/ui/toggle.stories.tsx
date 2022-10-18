@@ -1,7 +1,7 @@
 
 import { storiesOf } from '@storybook/react';
 import React, { useState } from 'react'
-import { Toggle } from './ui/toggle';
+import { Toggle } from './toggle';
 
 
 storiesOf("Components", module)

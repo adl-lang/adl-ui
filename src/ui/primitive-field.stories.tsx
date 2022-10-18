@@ -2,8 +2,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
-import { TypedFieldState, useTypedFieldState } from "../lib/fields/hooks";
-import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../lib/fields/primitive";
+import { TypedFieldState, useTypedFieldState } from "../model/fields/hooks";
+import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../model/fields/primitive";
 
 storiesOf("Fields", module)
   .add("String", () => {

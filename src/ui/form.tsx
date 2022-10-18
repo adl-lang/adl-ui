@@ -1,8 +1,8 @@
 import React from "react";
 import styled from 'styled-components';
-import { isJsonParseException } from '../../adl-gen/runtime/json';
-import { AdlFormProps, Mode } from '../../lib/form';
-import { VEditor } from "../../lib/veditor/type";
+import { isJsonParseException } from '../adl-gen/runtime/json';
+import { AdlFormProps, Mode } from '../model/form';
+import { VEditor } from "../model/veditor/type";
 import { Button } from "./button";
 import { Toggle } from "./toggle";
 

@@ -1,8 +1,8 @@
 
 import { storiesOf } from '@storybook/react';
 import React, { useState } from 'react'
-import { Modal } from './ui/modal';
-import { Button } from './ui/button';
+import { Modal } from './modal';
+import { Button } from './button';
 
 
 storiesOf("Components", module)

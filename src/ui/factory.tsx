@@ -5,14 +5,14 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash, faArrowUp, faArrowDown, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 
-import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../../lib/veditor/adlfactory";
-import {FieldFns} from "../../lib/fields/type";
-import {  Rendered,  VEditor } from '../../lib/veditor/type';
-import { typeExprToStringUnscoped } from '../../adl-gen/runtime/utils';
-import { Select } from "../ui/select";
-import { Toggle } from "../ui/toggle";
-import { CellContent } from '../../lib/adl-table';
-import { AdlFormState, createAdlFormState } from '../../lib/form';
+import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../model/veditor/adlfactory";
+import {FieldFns} from "../model/fields/type";
+import {  Rendered,  VEditor } from '../model/veditor/type';
+import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
+import { Select } from "./select";
+import { Toggle } from "./toggle";
+import { CellContent } from '../model/adl-table';
+import { createAdlFormState } from '../model/form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
 

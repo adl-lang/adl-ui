@@ -1,14 +1,12 @@
 import { storiesOf } from '@storybook/react';
 import {RESOLVER} from "../adl-gen/resolver";
-import {createVEditor } from "../lib/veditor/adlfactory";
+import {createVEditor } from "../model/veditor/adlfactory";
 
 import * as adlex from '../adl-gen/examples';
-import { UiFactory } from "./ui/factory";
-import { AdlFormState, createAdlFormState } from '../lib/form';
-import { AdlForm } from './ui/form';
+import { UiFactory } from "./factory";
+import { AdlFormState, createAdlFormState } from '../model/form';
+import { AdlForm } from './form';
 import { createJsonBinding } from '../adl-gen/runtime/json';
-import { GlobalStyle } from './ui/style';
-import React from 'react';
 import { customizedHierarchyVector } from './veditor.stories';
 
 storiesOf("Forms", module)
@@ -84,6 +82,6 @@ function renderFormStory<T>(state: AdlFormState<T>, disabled: boolean): JSX.Elem
     state,
     disabled,
     onCancel: () => console.log("onCancel"),
-    onApply: v => console.log("onApply", v),
+    onApply: (v:T) => console.log("onApply", v),
   });
 }

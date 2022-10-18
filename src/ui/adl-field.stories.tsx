@@ -2,8 +2,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
-import { TypedFieldState, useTypedFieldState } from "../lib/fields/hooks";
-import {createAdlField} from "../lib/fields/adl";
+import { TypedFieldState, useTypedFieldState } from "../model/fields/hooks";
+import {createAdlField} from "../model/fields/adl";
 import {texprHierarchy, texprPerson} from "../adl-gen/examples";
 import {RESOLVER} from "../adl-gen/resolver";
 
