@@ -169,8 +169,7 @@ export function customizedPersonVector(factory: Factory): VEditorCustomize {
             content: p => cellContent(p.gender.kind),
         },
       ];
-      const valueVEditor = createVEditor(adlex.texprPerson(), RESOLVER, factory);
-      return genericVectorVEditor(factory, columns, () => valueVEditor);
+      return genericVectorVEditor(factory, columns, () => createVEditor(adlex.texprPerson(), RESOLVER, factory));
     } else {
       return null;
     }
@@ -187,13 +186,17 @@ export function customizedHierarchyVector(factory: Factory): VEditorCustomize {
             content: p => cellContent(p.leader.name.first + " " + p.leader.name.last),
         },
         {
+          header: cellContent("Role"),
+          id: "role",
+          content: p => cellContent(p.leader.role),
+      },
+        {
             header: cellContent("Num underlings"),
             id: "num",
             content: p => cellContent(p.underlings.length + ""),
         },
       ];
-      const valueVEditor = createVEditor(adlex.texprHierarchy(), RESOLVER, factory);
-      return genericVectorVEditor(factory, columns, () => valueVEditor);
+      return genericVectorVEditor(factory, columns, () =>  createVEditor(adlex.texprHierarchy(), RESOLVER, factory));
     } else {
       return null;
     }

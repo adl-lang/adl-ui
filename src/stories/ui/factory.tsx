@@ -93,12 +93,10 @@ export class UiFactory implements Factory {
   renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered {
 
     interface ModalState {
+        value0: T | undefined;
         onApply: (value: T) => void;
     };
 
-    const formState = createAdlFormState({
-      veditor: props.valueVEditor(),
-    });
     const [modalState,setModalState] = React.useState<ModalState| undefined>();
 
     function deleteItem(i: number) {
@@ -118,8 +116,8 @@ export class UiFactory implements Factory {
     }
 
     function insertItemAfter(i: number) {
-      formState.setValue0(undefined);
       setModalState({
+        value0: undefined,
         onApply: (t:T) => {
           props.splice(i+1, 0, [t]);
           setModalState(undefined);
@@ -127,8 +125,8 @@ export class UiFactory implements Factory {
     }
 
     function editItem(i: number) {
-      formState.setValue0(props.values[i]);
       setModalState({
+        value0: props.values[i],
         onApply: (t:T) => {
           props.splice(i, 1, [t]);
           setModalState(undefined);
@@ -139,12 +137,13 @@ export class UiFactory implements Factory {
       if (modalState) {
         return (
           <Modal onClickBackground={() => setModalState(undefined)}>
-            <AdlForm
-            state={formState}
-            onApply={v => {
-              modalState.onApply(v as T)
-            }}
-            onCancel={() => setModalState(undefined)}
+            <VectorItemForm
+              veditor={props.valueVEditor()}
+              value0={modalState.value0}
+              onApply={v => {
+                modalState.onApply(v as T)
+              }}
+              onCancel={() => setModalState(undefined)}
             />
           </Modal>
         );
@@ -179,11 +178,9 @@ export class UiFactory implements Factory {
       return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
     });
 
-    const modal = renderModal();
-
     const below = (
       <div>
-        {modal}
+        {renderModal()}
         <Table>
           <THead><TR>{headers}<TH>{hcontrols}</TH></TR></THead>
           <TBody>{rows}</TBody>
@@ -231,6 +228,28 @@ export class UiFactory implements Factory {
     }
     return null;
   }
+}
+
+interface VectorItemFormProps<T> {
+  value0: T | undefined,
+  veditor: VEditor<T>,
+  onApply?(value: T): void;
+  onCancel?(): void;
+}
+
+function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
+  const formState = createAdlFormState({
+    value0: props.value0,
+    veditor: props.veditor,
+  });
+
+  return (
+    <AdlForm
+      state={formState}
+      onApply={props.onApply}
+      onCancel={props.onCancel}
+    />
+  );
 }
 
 const Row = styled.div`
