@@ -2,6 +2,7 @@ import React from "react";
 import styled from 'styled-components';
 import { isJsonParseException } from '../../adl-gen/runtime/json';
 import { AdlFormProps, Mode } from '../../lib/form';
+import { VEditor } from "../../lib/veditor/type";
 import { Button } from "./button";
 import { Toggle } from "./toggle";
 
@@ -62,15 +63,13 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
     }
   };
 
-  // tslint:disable-next-line: no-any
-  const onUpdate = (event: any) => {
+  const onUpdate = (event: unknown) => {
     const newVEditorState = state.veditor.update(state.veditorState, event);
     state.setVEditorState(newVEditorState);
     void validateForm(newVEditorState);
   }
 
-  // tslint:disable-next-line: no-any
-  const validateForm = async (adlState: any) => {
+  const validateForm = async (adlState: unknown) => {
     if (props.validate && state.mode === Mode.VE) {
       const value = state.veditor.valueFromState(adlState);
       const validationSeq = state.formValidation.validationSeq + 1;
@@ -122,15 +121,12 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
   switch (state.mode) {
     case Mode.VE:
       errors = state.veditor.validate(state.veditorState);
-      const rendered = state.veditor.render(
-        state.veditorState,
-        props.disabled == undefined ? false: props.disabled,
-        onUpdate
-      );
-      renderedEditor = <div>
-        {rendered.beside}
-        {rendered.below}
-      </div>;
+      renderedEditor = <FormVEditor 
+        veditor={state.veditor}
+        veditorState={state.veditorState}
+        disabled={props.disabled}
+        onUpdate={onUpdate}
+      />;
       break;
     case Mode.RAW:
       const result = parseRawText(state.rawState);
@@ -231,6 +227,23 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
       </div>
     </div>
   );
+}
+
+function FormVEditor(props: {
+  veditor: VEditor<unknown>,
+  veditorState: unknown,
+  disabled?: boolean,
+  onUpdate: (ev:unknown) => void,
+}) {
+  const rendered = props.veditor.render(
+    props.veditorState,
+    props.disabled == undefined ? false: props.disabled,
+    props.onUpdate
+  );
+  return <div>
+    {rendered.beside}
+    {rendered.below}
+  </div>;
 }
 
 const ErrLabel = styled.label`
