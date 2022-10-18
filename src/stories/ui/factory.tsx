@@ -42,16 +42,17 @@ export class UiFactory implements Factory {
     const rows = props.fields.map(fd => {
       const label = props.disabled? fd.label : <b>{fd.label}</b>;
       const rendered = fd.veditor.veditor.render(fd.veditor.state, props.disabled, fd.veditor.onUpdate);
+      const x = <></>;
       return (
-        <>
-        <tr key={"1_" + fd.name}>
-          <StructFieldLabel>
-            <label>{label}</label>
-          </StructFieldLabel>
-          {rendered.beside && <StructFieldBeside>{rendered.beside}</StructFieldBeside>}
-        </tr>
-        {rendered.below && <tr key = {"2_" + fd.name}><StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow></tr>}
-        </>
+        <React.Fragment key={fd.name}>
+          <tr>
+            <StructFieldLabel>
+              <label>{label}</label>
+            </StructFieldLabel>
+            {rendered.beside && <StructFieldBeside>{rendered.beside}</StructFieldBeside>}
+          </tr>
+          {rendered.below && <tr><StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow></tr>}
+        </React.Fragment>
       );
     });
     const below = (

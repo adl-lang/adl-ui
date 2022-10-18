@@ -9,6 +9,7 @@ const LOADING_SPIN = keyframes`
       transform: rotate(360deg)
     }
 `;
+
 export const Button = styled.button<ButtonProps>`
   //default styles
   font-weight: ${props => style(props).fontWeight};
@@ -29,7 +30,7 @@ export const Button = styled.button<ButtonProps>`
     background-color: ${props => bgcolor(props,'active')};
     color: ${props => color(props, 'active')};
   }
-  ${props => props.loading && css`
+  ${props => props.$loading && css`
   &:after {
     content: "";
     position: absolute;
@@ -43,7 +44,7 @@ export const Button = styled.button<ButtonProps>`
     animation: ${LOADING_SPIN} infinite linear 500ms;
   }
   `}
-  ${props => props.basic && props.loading && css`
+  ${props => props.basic && props.$loading && css`
     &:after {
       border: 2px solid rgba(0,0,0,0.1);
       border-top-color: grey;
@@ -56,7 +57,7 @@ export const Button = styled.button<ButtonProps>`
 
 export interface ButtonProps {
   icon?: ReactChild,
-  loading?: boolean,
+  $loading?: boolean,    // Stupid name for an styled transient prop, to make styled components not pass the prop to the dom element.
   primary?: boolean,
   basic?: boolean,
 }
@@ -84,7 +85,7 @@ function bgcolor(props: ButtonProps & {disabled?: boolean},  selector:'normal'|'
 
 function color(props: ButtonProps & {loading?: boolean},  selector:'normal'|'hover'|'active'): string {
   const cs = style(props);
-  if (!props.loading) {
+  if (!props.$loading) {
     return cs.text;
   }
   switch(selector) {

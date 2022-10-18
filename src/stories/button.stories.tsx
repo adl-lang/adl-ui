@@ -9,15 +9,15 @@ storiesOf("Components", module)
     return (
       <Grid>
         <Button>Standard</Button>
-        <Button loading disabled={true}>Standard (loading)</Button>
+        <Button $loading disabled={true}>Standard (loading)</Button>
         <Button disabled={true}>Standard (disabled)</Button>
 
         <Button primary>Primary</Button>
-        <Button primary loading disabled={true}>Primary (loading)</Button>
+        <Button primary $loading disabled={true}>Primary (loading)</Button>
         <Button disabled={true} primary>Primary (disabled)</Button>
 
         <Button basic>Basic</Button>
-        <Button basic loading disabled={true}>Basic (loading)</Button>
+        <Button basic $loading disabled={true}>Basic (loading)</Button>
         <Button disabled={true} basic>Basic (disabled)</Button>
       </Grid>
     )

@@ -127,10 +127,10 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
         props.disabled == undefined ? false: props.disabled,
         onUpdate
       );
-      renderedEditor = <>
+      renderedEditor = <div>
         {rendered.beside}
         {rendered.below}
-      </>
+      </div>;
       break;
     case Mode.RAW:
       const result = parseRawText(state.rawState);
@@ -157,34 +157,37 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
     default:
   }
 
-  const buttons: JSX.Element[] = [];
-  if (props.onApply) {
-    buttons.push(
-      <Button
-        primary
-        loading={state.formValidation.type === "awaiting"}
-        disabled={errors.length > 0}
-        key="Apply"
-        onClick={onApply}
-      >
-        Apply
-      </Button>
-    );
+  function applyButton() {
+    if (props.onApply) {
+      return (
+        <Button
+          primary
+          $loading={state.formValidation.type === "awaiting"}
+          disabled={errors.length > 0}
+          onClick={onApply}
+        >
+          Apply
+        </Button>
+      );
+    }
   }
-  if (props.onClose) {
-    buttons.push(
-      <Button key="Close" onClick={props.onClose}>
-        Close
-      </Button>
-    );
+
+  function closeButton() {
+    if (props.onClose) {
+      return (
+        <Button onClick={props.onClose}>Close</Button>
+      );
+    }
   }
-  if (props.onCancel) {
-    buttons.push(
-      <Button onClick={props.onCancel}>
-        Cancel
-      </Button>
-    );
+
+  function cancelButton() {
+    if (props.onCancel) {
+      return (
+        <Button onClick={props.onCancel}>Cancel</Button>
+      );
+    }
   }
+  
 
   let rawToggle: JSX.Element | null = null;
   if (state.jsonBinding) {
@@ -214,7 +217,9 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
         {formError}
         <ActionBar>
           <ActionGroup>
-            {buttons}
+            {applyButton()}
+            {closeButton()}
+            {cancelButton()}
           </ActionGroup>
           { rawToggle &&
             <ActionGroup>
