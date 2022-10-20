@@ -1,32 +1,39 @@
-import React from 'react';
-import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
 import { TypedFieldState, useTypedFieldState } from "../model/fields/hooks";
 import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../model/fields/primitive";
 
-storiesOf("Fields", module)
-  .add("String", () => {
+export default {
+  title: 'Fields', 
+};
+
+export const String = () => {
     const fs = useTypedFieldState(STRING_FIELD);
     return renderTypedField(fs);
-  })
-  .add("Number", () => {
+  }
+
+export const Number = () => {
     const fs = useTypedFieldState(NUMBER_FIELD);
     return renderTypedField(fs);
-  })
-  .add("Boolean", () => {
+  }
+
+export const Boolean = () => {
     const fs = useTypedFieldState(BOOLEAN_FIELD);
     return renderTypedField(fs);
-  })
-  .add("Integer (1-5)", () => {
+  }
+
+export const IntegerLimited = () => {
     const fs = useTypedFieldState(intFieldFns(1,5));
     return renderTypedField(fs);
-  })
-  .add("Json", () => {
+  }
+IntegerLimited.storyName = 'Integer (1-5)';
+
+export const Json = () => {
     const fs = useTypedFieldState(JSON_FIELD);
     return renderTypedTextArea(fs);
-  })
-  .add("Simple Form", () => {
+  }
+
+export const SimpleForm = () => {
     const name = useTypedFieldState(NON_EMPTY_STRING_FIELD);
     const age = useTypedFieldState(intFieldFns(1,120));
 
@@ -49,7 +56,7 @@ storiesOf("Fields", module)
         <p>{message}</p>
       </div>
     );
-  });
+  }
 
 /** Render a typed field with any validation error */
 function renderTypedField<T>(fs: TypedFieldState<T>) {

@@ -1,40 +1,40 @@
 {
-  "name": "@timbod7/adl-ui",
-  "version": "0.0.1",
-  "description": "A user interface toolkit for ADL",
-  "author": "Tim Docker",
-  "license": "MIT",
-  "files": [
-    "**"
-  ],
+  "name": "demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "tsc",
+    "test": "yarn vitest",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
-  "devDependencies": {
-    "@babel/core": "^7.17.5",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^5.3.6",
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
-    "@fortawesome/react-fontawesome": "^0.2.0",
-    "@storybook/addon-actions": "^6.4.19",
-    "@storybook/addon-essentials": "^6.4.19",
-    "@storybook/addon-interactions": "^6.4.19",
-    "@storybook/addon-links": "^6.4.19",
-    "@storybook/react": "^6.4.19",
-    "@storybook/testing-library": "^0.0.9",
-    "@types/react": "^17.0.39",
-    "@types/styled-components": "^5.1.23",
-    "babel-loader": "^8.2.3",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "sb": "^6.4.19",
-    "styled-components": "^5.3.3",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.5"
+    "@fortawesome/react-fontawesome": "^0.2.0"
   },
-  "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+  "devDependencies": {
+    "@babel/core": "^7.19.3",
+    "@storybook/addon-actions": "^6.5.12",
+    "@storybook/addon-essentials": "^6.5.12",
+    "@storybook/addon-interactions": "^6.5.12",
+    "@storybook/addon-links": "^6.5.12",
+    "@storybook/builder-vite": "^0.2.4",
+    "@storybook/react": "^6.5.12",
+    "@storybook/testing-library": "^0.0.13",
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6",
+    "@types/styled-components": "^5.1.26",
+    "@vitejs/plugin-react": "^2.1.0",
+    "babel-loader": "^8.2.5",
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0",
+    "vitest": "^0.24.3"
   }
 }

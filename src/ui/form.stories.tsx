@@ -9,15 +9,19 @@ import { AdlForm } from './form';
 import { createJsonBinding } from '../adl-gen/runtime/json';
 import { customizedHierarchyVector } from './veditor.stories';
 
-storiesOf("Forms", module)
-.add("Person (empty)", () => {
+export default {
+  title: 'Forms',
+};
+
+export const PersonEmpty = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
   const state = createAdlFormState({
     veditor
   })
   return renderFormStory(state, false);
-})  
-.add("Person (initialized)", () => {
+}
+
+export const PersonInitialized = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
   const state = createAdlFormState({
     veditor,
@@ -29,8 +33,9 @@ storiesOf("Forms", module)
     }
   })
   return renderFormStory(state, false);
-})  
-.add("Person (with raw mode)", () => {
+}
+
+export const PersonWithRawMode = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
   const jsonBinding = createJsonBinding(RESOLVER, adlex.texprPerson());
   const state = createAdlFormState({
@@ -44,8 +49,9 @@ storiesOf("Forms", module)
     }
   })
   return renderFormStory(state, false);
-})
-.add("Hierarchy", () => {
+}
+
+export const Hierararchy = () => {
   const factory = new UiFactory();
   factory.addCustomVEditor(customizedHierarchyVector(factory)); 
   const veditor = createVEditor(adlex.texprHierarchy(), RESOLVER, factory);
@@ -75,7 +81,7 @@ storiesOf("Forms", module)
     }
   })
   return renderFormStory(state, false);
-})
+}
 
 function renderFormStory<T>(state: AdlFormState<T>, disabled: boolean): JSX.Element {
   return AdlForm({

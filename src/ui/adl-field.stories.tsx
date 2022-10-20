@@ -1,5 +1,3 @@
-import React from 'react';
-import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
 import { TypedFieldState, useTypedFieldState } from "../model/fields/hooks";
@@ -7,17 +5,22 @@ import {createAdlField} from "../model/fields/adl";
 import {texprHierarchy, texprPerson} from "../adl-gen/examples";
 import {RESOLVER} from "../adl-gen/resolver";
 
-storiesOf("Fields", module)
-  .add("JSON - Person", () => {
-    const f = createAdlField(texprPerson(), RESOLVER);
-    const fs = useTypedFieldState(f);
-    return renderTypedTextArea(fs);
-  })
-  .add("JSON - Hierarchy", () => {
-    const f = createAdlField(texprHierarchy(), RESOLVER);
-    const fs = useTypedFieldState(f);
-    return renderTypedTextArea(fs);
-  })
+export default {
+  title: 'Fields', 
+};
+
+export const JsonPerson = () => {
+  const f = createAdlField(texprPerson(), RESOLVER);
+  const fs = useTypedFieldState(f);
+  return renderTypedTextArea(fs);
+}
+
+export const JsonHiearchy = () => {
+  const f = createAdlField(texprHierarchy(), RESOLVER);
+  const fs = useTypedFieldState(f);
+  return renderTypedTextArea(fs);
+}
+
  
 /** Render a typed multiline text area */
 function renderTypedTextArea<T>(fs: TypedFieldState<T>) {

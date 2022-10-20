@@ -1,3 +1,4 @@
+import React from "react";
 import {GlobalStyle} from "../src/ui/style"
 
 export const parameters = {
@@ -12,9 +13,9 @@ export const parameters = {
 
 export const decorators = [
   (Story) => (
-    <>
+    <React.Fragment>
       <GlobalStyle/>
       <Story />
-    </>
+    </React.Fragment>
   ),
 ];
