@@ -3,11 +3,13 @@ import {RESOLVER} from "../adl-gen/resolver";
 import {createVEditor } from "../model/veditor/adlfactory";
 
 import * as adlex from '../adl-gen/examples';
+import * as adlrt  from "../adl-gen/runtime/adl";
+
 import { UiFactory } from "./factory";
 import { AdlFormState, createAdlFormState } from '../model/form';
 import { AdlForm } from './form';
 import { createJsonBinding } from '../adl-gen/runtime/json';
-import { customizedHierarchyVector } from './veditor.stories';
+import { customizedHierarchyVector, customizedPersonVector } from './veditor.stories';
 
 export default {
   title: 'Forms',
@@ -47,6 +49,17 @@ export const PersonWithRawMode = () => {
       gender: {kind:"male"},
       role: "boss"
     }
+  })
+  return renderFormStory(state, false);
+}
+
+export const  VectorPerson = () => {
+
+  const factory = new UiFactory();
+  factory.addCustomVEditor(customizedPersonVector(factory)); 
+  const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, factory);
+  const state = createAdlFormState({
+    veditor
   })
   return renderFormStory(state, false);
 }
