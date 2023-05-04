@@ -70,7 +70,8 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
   }
 
   const validateForm = async (adlState: unknown) => {
-    if (props.validate && state.mode === Mode.VE) {
+    const adlValid = state.veditor.validate(adlState).length === 0;
+    if (adlValid && props.validate && state.mode === Mode.VE) {
       const value = state.veditor.valueFromState(adlState);
       const validationSeq = state.formValidation.validationSeq + 1;
       state.setFormValidation({
