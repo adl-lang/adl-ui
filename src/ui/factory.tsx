@@ -91,108 +91,9 @@ export class UiFactory implements Factory {
    }
   }
   
-  renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered {
-
-    interface ModalState {
-        value0: T | undefined;
-        onApply: (value: T) => void;
-    };
-
-    const [modalState,setModalState] = React.useState<ModalState| undefined>();
-
-    function deleteItem(i: number) {
-      props.splice(i, 1, []);
-    }
-    
-    function moveItemUp(i: number) {
-      props.splice(i-1, 2, [props.values[i], props.values[i-1]]);
-    }
-    
-    function moveItemDown(i: number) {
-      props.splice(i, 2, [props.values[i+1], props.values[i]]);
-    }
-
-    function iconColor(enabled: boolean): string {
-      return enabled ? "black" : "lightGrey"
-    }
-
-    function insertItemAfter(i: number) {
-      setModalState({
-        value0: undefined,
-        onApply: (t:T) => {
-          props.splice(i+1, 0, [t]);
-          setModalState(undefined);
-      }})
-    }
-
-    function editItem(i: number) {
-      setModalState({
-        value0: props.values[i],
-        onApply: (t:T) => {
-          props.splice(i, 1, [t]);
-          setModalState(undefined);
-      }})
-    }
-
-    function renderModal() : JSX.Element | undefined {
-      if (modalState) {
-        return (
-          <Modal onClickBackground={() => setModalState(undefined)}>
-            <VectorItemForm
-              veditor={props.valueVEditor()}
-              value0={modalState.value0}
-              onApply={v => {
-                modalState.onApply(v as T)
-              }}
-              onCancel={() => setModalState(undefined)}
-            />
-          </Modal>
-        );
-      }
-    }
-
-    const headers = props.columns.map((c) => {
-      return <TH key={c.id}>{this.renderContent(c.header)}</TH>;
-    });
-    const hcontrols = (
-      <RowControls>
-        <FontAwesomeIcon icon={faCirclePlus} onClick={() => insertItemAfter(props.values.length - 1)}/>
-      </RowControls>
-    );
-    
-    const rows = props.values.map((v,i) => {
-      const row = props.columns.map( (c) => {
-        return <TD key={c.id}>{this.renderContent(c.content(v,i))}</TD>;
-      });
-      
-      const canMoveUp = i > 0;
-      const canMoveDown = i < props.values.length - 1;
-      
-      const controls = (
-        <RowControls>
-          <FontAwesomeIcon icon={faEdit} onClick={() => editItem(i)}/>
-          <FontAwesomeIcon icon={faArrowUp} color={iconColor(canMoveUp)} onClick={() => canMoveUp && moveItemUp(i)}/>
-          <FontAwesomeIcon icon={faArrowDown} color={iconColor(canMoveDown)} onClick={() => canMoveDown && moveItemDown(i)}/>
-          <FontAwesomeIcon icon={faTrash} onClick={() => deleteItem(i)}/>
-        </RowControls>
-      );
-      return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
-    });
-
-    const below = (
-      <div>
-        {renderModal()}
-        <Table>
-          <THead><TR>{headers}<TH>{hcontrols}</TH></TR></THead>
-          <TBody>{rows}</TBody>
-        </Table>
-      </div>
-    );
-    return {below};
-  }
-
-  renderContent(content: CellContent) {
-    return content && content.value;
+  renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered { 
+    const below = <VectorVeditor {...props}/>;
+    return {below}; 
   }
   
   renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered {
@@ -250,6 +151,109 @@ function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
       onApply={props.onApply}
       onCancel={props.onCancel}
     />
+  );
+}
+
+function VectorVeditor<T>(props: VectorEditorProps<T>) {
+
+    interface ModalState {
+      value0: T | undefined;
+      onApply: (value: T) => void;
+  };
+
+  const [modalState,setModalState] = React.useState<ModalState| undefined>();
+
+  function deleteItem(i: number) {
+    props.splice(i, 1, []);
+  }
+
+  function moveItemUp(i: number) {
+    props.splice(i-1, 2, [props.values[i], props.values[i-1]]);
+  }
+
+  function moveItemDown(i: number) {
+    props.splice(i, 2, [props.values[i+1], props.values[i]]);
+  }
+
+  function iconColor(enabled: boolean): string {
+    return enabled ? "black" : "lightGrey"
+  }
+
+  function insertItemAfter(i: number) {
+    setModalState({
+      value0: undefined,
+      onApply: (t:T) => {
+        props.splice(i+1, 0, [t]);
+        setModalState(undefined);
+    }})
+  }
+
+  function editItem(i: number) {
+    setModalState({
+      value0: props.values[i],
+      onApply: (t:T) => {
+        props.splice(i, 1, [t]);
+        setModalState(undefined);
+    }})
+  }
+
+  function renderModal() : JSX.Element | undefined {
+    if (modalState) {
+      return (
+        <Modal onClickBackground={() => setModalState(undefined)}>
+          <VectorItemForm
+            veditor={props.valueVEditor()}
+            value0={modalState.value0}
+            onApply={v => {
+              modalState.onApply(v as T)
+            }}
+            onCancel={() => setModalState(undefined)}
+          />
+        </Modal>
+      );
+    }
+  }
+
+  function renderContent(content: CellContent) {
+    return content && content.value;
+  }
+
+  const headers = props.columns.map((c) => {
+    return <TH key={c.id}>{renderContent(c.header)}</TH>;
+  });
+  const hcontrols = (
+    <RowControls>
+      <FontAwesomeIcon icon={faCirclePlus} onClick={() => insertItemAfter(props.values.length - 1)}/>
+    </RowControls>
+  );
+
+  const rows = props.values.map((v,i) => {
+    const row = props.columns.map( (c) => {
+      return <TD key={c.id}>{renderContent(c.content(v,i))}</TD>;
+    });
+    
+    const canMoveUp = i > 0;
+    const canMoveDown = i < props.values.length - 1;
+    
+    const controls = (
+      <RowControls>
+        <FontAwesomeIcon icon={faEdit} onClick={() => editItem(i)}/>
+        <FontAwesomeIcon icon={faArrowUp} color={iconColor(canMoveUp)} onClick={() => canMoveUp && moveItemUp(i)}/>
+        <FontAwesomeIcon icon={faArrowDown} color={iconColor(canMoveDown)} onClick={() => canMoveDown && moveItemDown(i)}/>
+        <FontAwesomeIcon icon={faTrash} onClick={() => deleteItem(i)}/>
+      </RowControls>
+    );
+    return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
+  });
+
+  return (
+    <div>
+      {renderModal()}
+      <Table>
+        <THead><TR>{headers}<TH>{hcontrols}</TH></TR></THead>
+        <TBody>{rows}</TBody>
+      </Table>
+    </div>
   );
 }
 

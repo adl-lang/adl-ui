@@ -134,6 +134,15 @@ export const VectorPerson = () => {
   const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
 }  
+
+export const MaybeVectorPerson = () => {
+  const initial: adlsys.Maybe<adlex.Person[]> = { kind: "just", value: [
+    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
+    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+  ]};
+  const veditor = createVEditor(adlsys.texprMaybe(adlrt.texprVector(adlex.texprPerson())), RESOLVER, new UiFactory());
+  return renderVEditorStory(veditor, false, initial);
+}  
   
 export const VectorPersonCustomized = () => {
   // Customize the displayed table to include derived columns
