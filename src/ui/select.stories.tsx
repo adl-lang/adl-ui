@@ -1,5 +1,5 @@
 
-import { useSelectState } from "../model/select";
+import { useSelectState } from "./select";
 import { Select } from './select';
 
 export default {
