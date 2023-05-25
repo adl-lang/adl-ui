@@ -7,103 +7,111 @@ import { faEdit, faTrash, faArrowUp, faArrowDown, faCirclePlus } from '@fortawes
 
 import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../model/veditor/adlfactory";
 import {FieldFns} from "../model/fields/type";
-import {  Rendered,  VEditor } from '../model/veditor/type';
 import { typeExprToStringUnscoped } from '../adl-gen/runtime/utils';
 import { Select } from "./select";
 import { Toggle } from "./toggle";
 import { CellContent } from '../model/adl-table';
-import { createAdlFormState } from '../model/form';
+import { createAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
+import { RenderFn, RenderProps, VEditor } from './veditor';
 
-
-export class UiFactory implements Factory {
-   veditorCustomize: VEditorCustomize[] = [];
+export class UiFactory implements Factory<RenderFn> {
+   veditorCustomize: VEditorCustomize<RenderFn>[] = [];
    fieldCustomize: FieldCustomize[] = [];
   
-  renderVoidEditor(): Rendered {
-    return {};
+  renderVoidEditor(): RenderFn {
+    return () => ({});
   }
   
-  renderFieldEditor(props: FieldEditorProps): Rendered {
-    const {fieldfns, disabled, state, onUpdate} = props;
-    const errlabel = fieldfns.validate(state);
-    const beside = (
-      <Row>
-        <StyledInput value={state} onChange={(s) => onUpdate(s.currentTarget.value)} disabled={disabled}/>
-        {errlabel && <StyledError>{errlabel}</StyledError>}
-      </Row>
+  renderFieldEditor(props: FieldEditorProps): RenderFn {
+    return ({disabled}: RenderProps) => {
+      const {fieldfns, state, onUpdate} = props;
+      const errlabel = fieldfns.validate(state);
+      const beside = (
+        <Row>
+          <StyledInput value={state} onChange={(s) => onUpdate(s.currentTarget.value)} disabled={disabled}/>
+          {errlabel && <StyledError>{errlabel}</StyledError>}
+        </Row>
+        );
+      return {beside};    
+    }     
+  }
+  
+  renderStructEditor(props: StructEditorProps<RenderFn>): RenderFn {
+    return (rprops: RenderProps) => {
+      const rows = props.fields.map(fd => {
+        const label = rprops.disabled? fd.label : <b>{fd.label}</b>;
+        const rendered = fd.veditor.veditor.render(fd.veditor.state, fd.veditor.onUpdate)(rprops);
+        const x = <></>;
+        return (
+          <React.Fragment key={fd.name}>
+            <tr>
+              <StructFieldLabel>
+                <label>{label}</label>
+              </StructFieldLabel>
+              {rendered.beside && <StructFieldBeside>{rendered.beside}</StructFieldBeside>}
+            </tr>
+            {rendered.below && <tr><StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow></tr>}
+          </React.Fragment>
+        );
+      });
+      const below = (
+        <StructContent>
+          <tbody>{rows}</tbody>
+        </StructContent>
       );
-    return {beside};         
-  }
-  
-  
-  renderStructEditor(props: StructEditorProps): Rendered {
-    const rows = props.fields.map(fd => {
-      const label = props.disabled? fd.label : <b>{fd.label}</b>;
-      const rendered = fd.veditor.veditor.render(fd.veditor.state, props.disabled, fd.veditor.onUpdate);
-      const x = <></>;
-      return (
-        <React.Fragment key={fd.name}>
-          <tr>
-            <StructFieldLabel>
-              <label>{label}</label>
-            </StructFieldLabel>
-            {rendered.beside && <StructFieldBeside>{rendered.beside}</StructFieldBeside>}
-          </tr>
-          {rendered.below && <tr><StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow></tr>}
-        </React.Fragment>
-      );
-    });
-    const below = (
-      <StructContent>
-        <tbody>{rows}</tbody>
-      </StructContent>
-    );
-    return {below};
-  }
-  
-  renderUnionEditor(props: UnionEditorProps): Rendered {
-  
-     const beside = <Select state={props.selectState}/>;
-     if( !props.veditor) {
-       return {beside};
-     }
-     const r = props.veditor.veditor.render(props.veditor.state, props.disabled, props.veditor.onUpdate);
-     const below = <div>{r.beside}{r.below}</div>;
-     return {
-      beside,
-      below
+      return {below};
     }
   }
   
-  renderMaybeEditor(props: MaybeEditorProps): Rendered {
-  
-    const beside = <Toggle disabled={props.disabled} checked={props.isActive} onChange={props.toggleIsActive}/>;
-    if (!props.isActive) {
-      return {beside};
-    }
-    const r = props.veditor.veditor.render(props.veditor.state, props.disabled, props.veditor.onUpdate);
-    const below = <div>{r.beside}{r.below}</div>;
-    return {
-     beside,
-     below
-   }
-  }
-  
-  renderVectorEditor<T>(props: VectorEditorProps<T>): Rendered { 
-    const below = <VectorVeditor {...props}/>;
-    return {below}; 
-  }
-  
-  renderUnimplementedEditor(props: UnimplementedEditorProps): Rendered {
-    return {
-      beside: <div>unimplemented veditor for {typeExprToStringUnscoped(props.typeExpr)}</div>,
-      below: undefined,
+  renderUnionEditor(props: UnionEditorProps<RenderFn>): RenderFn {
+    return (rprops: RenderProps) => {
+      const beside = <Select state={props.selectState}/>;
+      if( !props.veditor) {
+        return {beside};
       }
+      const r = props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
+      const below = <div>{r.beside}{r.below}</div>;
+      return {
+        beside,
+        below
+      }
+    }
+  }
+  
+  renderMaybeEditor(props: MaybeEditorProps<RenderFn>): RenderFn {
+    return (rprops: RenderProps) => {
+      const beside = <Toggle disabled={rprops.disabled} checked={props.isActive} onChange={props.toggleIsActive}/>;
+      if (!props.isActive) {
+        return {beside};
+      }
+      const r = props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
+      const below = <div>{r.beside}{r.below}</div>;
+      return {
+        beside,
+        below
+      }
+    }
+  }
+  
+  renderVectorEditor<T>(props: VectorEditorProps<T, RenderFn>): RenderFn {
+    return (_rprops: RenderProps) => {
+      const below = <VectorVeditor {...props}/>;
+      return {below}; 
+    }
+  }
+  
+  renderUnimplementedEditor(props: UnimplementedEditorProps): RenderFn {
+    return (_rprops: RenderProps) => {
+      return {
+        beside: <div>unimplemented veditor for {typeExprToStringUnscoped(props.typeExpr)}</div>,
+        below: undefined,
+      }
+    }
   }
 
-  addCustomVEditor(vc : VEditorCustomize) {
+  addCustomVEditor(vc : VEditorCustomize<RenderFn>) {
     this.veditorCustomize.push(vc);
   }
 
@@ -154,7 +162,7 @@ function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
   );
 }
 
-function VectorVeditor<T>(props: VectorEditorProps<T>) {
+function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
 
     interface ModalState {
       value0: T | undefined;

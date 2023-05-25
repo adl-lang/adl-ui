@@ -3,8 +3,9 @@
 //    T: the type of value being edited
 //    S: the type of state required for editing
 //    E: the type of events
+//    R: the result of the rendering operation
 
-export interface IVEditor<T, S, E> {
+export interface IVEditor<T, S, E, R> {
   // The state for an empty editor
   initialState: S;
 
@@ -23,18 +24,11 @@ export interface IVEditor<T, S, E> {
   update(state: S, event: E): S;
 
   // Render the editor's current state as a UI.
-  render(state: S, disabled: boolean, onUpdate: UpdateFn<E>): Rendered;
-}
-
-export interface Rendered {
-  // Content to be shown beside a label
-  beside?: JSX.Element;
-
-  // Content to be shown indented below the label. 
-  below?: JSX.Element;
+  render(state: S, onUpdate: UpdateFn<E>): R;
 }
 
 export type UpdateFn<E> = (e: E) => void;
 
-export type VEditor<T> = IVEditor<T, unknown, unknown>;
-export type UVEditor = VEditor<unknown>;
+// An opaque value editor, where the internal implementation types
+// need not be known. 
+export type OVEditor<T,R> = IVEditor<T,unknown,unknown,R>;

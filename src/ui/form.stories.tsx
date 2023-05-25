@@ -6,7 +6,7 @@ import * as adlex from '../adl-gen/examples';
 import * as adlrt  from "../adl-gen/runtime/adl";
 
 import { UiFactory } from "./factory";
-import { AdlFormState, createAdlFormState } from '../model/form';
+import { AdlFormState, createAdlFormState } from './form';
 import { AdlForm } from './form';
 import { createJsonBinding } from '../adl-gen/runtime/json';
 import { customizedHierarchyVector, customizedPersonVector } from './veditor.stories';

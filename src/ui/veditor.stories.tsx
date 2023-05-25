@@ -7,7 +7,7 @@ import * as adlsys from "../adl-gen/sys/types";
 import {RESOLVER} from "../adl-gen/resolver";
 import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../model/veditor/adlfactory";
 import {Column, cellContent} from "../model/adl-table";
-import { VEditor } from '../model/veditor/type';
+import { RenderFn, VEditor } from './veditor';
 import { typeExprsEqual } from '../adl-gen/runtime/utils';
 import * as adlex from '../adl-gen/examples';
 import { UiFactory } from "./factory";
@@ -161,7 +161,8 @@ export const VectorPersonCustomized = () => {
 function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial?: T): JSX.Element {
   const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const errs = veditor.validate(state);
-  const elements = veditor.render(state, disabled || false, e => setState((s:unknown) => veditor.update(s,e)));
+  const rprops = {disabled: !!disabled};
+  const elements = veditor.render(state, e => setState((s:unknown) => veditor.update(s,e)))(rprops);
   return (
     <Content>
       <Row><HeaderLabel>Value:</HeaderLabel>{elements.beside}</Row>
@@ -175,7 +176,7 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
   );
 }
 
-export function customizedPersonVector(factory: Factory): VEditorCustomize {
+export function customizedPersonVector(factory: Factory<RenderFn>): VEditorCustomize<RenderFn> {
   return (ctx: CustomContext) => {
     const texpr = adlrt.texprVector(adlex.texprPerson());
     if (typeExprsEqual(ctx.typeExpr, texpr.value)) {
@@ -207,7 +208,7 @@ export function customizedPersonVector(factory: Factory): VEditorCustomize {
     }
   }
 }
-export function customizedHierarchyVector(factory: Factory): VEditorCustomize {
+export function customizedHierarchyVector(factory: Factory<RenderFn>): VEditorCustomize<RenderFn> {
   return (ctx: CustomContext) => {
     const texpr = adlrt.texprVector(adlex.texprHierarchy());
     if (typeExprsEqual(ctx.typeExpr, texpr.value)) {
