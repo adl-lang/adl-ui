@@ -85,19 +85,22 @@ export function intFieldFns(minValue: number | null, maxValue: number | null): F
   };
 }
 
+
 // An arbitrary number
 export function numberFieldFns(): FieldFns<number> {
+  const re = new RegExp('^\\s*[+-]?\\d+(\\.\\d+)?\\s*$');
   return {
     toText(v) {
       return "" + v;
     },
     validate(text) {
-      const v = parseFloat(text);
-      if (isNaN(v)) {
-        return "must be a number";
-      } else {
-        return null;
+      if (text.match(re)) {
+        const v = parseFloat(text);
+        if (!isNaN(v)) {
+          return null;
+        }
       }
+      return "must be a number";
     },
     fromText(text) {
       return parseFloat(text);
