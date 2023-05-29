@@ -135,10 +135,9 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
       case Mode.VE:
         // Update the rawstate if we can, before switching to raw mode
         // tslint:disable-next-line:no-shadowed-variable
-        const errors = state.veditor.validate(state.veditorState);
-        if (errors.length === 0 && state.jsonBinding) {
-          const value = state.veditor.valueFromState(state.veditorState);
-          const rawState = JSON.stringify(state.jsonBinding.toJson(value), null, 2);
+        const vv = state.veditor.valueFromState(state.veditorState);
+        if (vv.isValid && state.jsonBinding) {
+          const rawState = JSON.stringify(state.jsonBinding.toJson(vv.value), null, 2);
           state.setMode(Mode.RAW);
           state.setRawState(rawState);
         } else {
@@ -190,16 +189,16 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
   }
 
   const validateForm = async (adlState: unknown) => {
-    const adlValid = state.veditor.validate(adlState).length === 0;
-    if (adlValid && props.validate && state.mode === Mode.VE) {
-      const value = state.veditor.valueFromState(adlState);
+    const vv = state.veditor.valueFromState(adlState);
+
+    if (vv.isValid && props.validate && state.mode === Mode.VE) {
       const validationSeq = state.formValidation.validationSeq + 1;
       state.setFormValidation({
           type: "awaiting",
           validationSeq
       });
-      console.log("awaiting validation of ", value);
-      const error: string | undefined = await props.validate(value);
+      console.log("awaiting validation of ", vv.value);
+      const error: string | undefined = await props.validate(vv.value);
       console.log("done");
       if (error && error.length > 0) {
         state.setFormValidation({
@@ -221,7 +220,11 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
     let value: unknown = null;
     switch (state.mode) {
       case Mode.VE:
-        value = state.veditor.valueFromState(state.veditorState);
+        const vv = state.veditor.valueFromState(state.veditorState);
+        if (!vv.isValid) {
+          throw new Error("BUG: onApply called with invalid state");
+        }
+        value = vv.value;
         break;
       case Mode.RAW:
         if (state.jsonBinding) {
@@ -241,7 +244,8 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
 
   switch (state.mode) {
     case Mode.VE:
-      errors = state.veditor.validate(state.veditorState);
+      const vv = state.veditor.valueFromState(state.veditorState);
+      errors = !vv.isValid ? vv.errors : [];
       renderedEditor = <FormVEditor 
         veditor={state.veditor}
         veditorState={state.veditorState}
