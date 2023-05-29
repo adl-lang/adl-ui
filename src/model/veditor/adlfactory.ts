@@ -4,7 +4,7 @@ import * as systypes from "../../adl-gen/sys/types";
 import * as adltree from "../adl-tree";
 import { createJsonBinding } from '../../adl-gen/runtime/json';
 
-import {IVEditor, OVEditor, UpdateFn} from "./type";
+import {IVEditor, OVEditor, UpdateFn, Validated, invalid, mapValidated, valid} from "./type";
 import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
@@ -256,25 +256,22 @@ function voidVEditor<R>(factory: Factory<R>): IVEditor<null,null,null,R> {
   return {
     initialState: null,
     stateFromValue: () => null,
-    validate: () => [],
-    valueFromState: () => null,
+    valueFromState: () => valid(null),
     update: s => s,
     render: () => factory.renderVoidEditor(),
   };
-
 }
 
 function fieldVEditor<T,R>(factory: Factory<R>, _typeExpr: adlast.TypeExpr, fieldfns: FieldFns<T>): IVEditor<T,string,string,R> {
-  function validate(t: string): string[] {
-    const err = fieldfns.validate(t);
-    return err === null ? [] : [err];
+  function valueFromState(s: string): Validated<T> {
+    const err = fieldfns.validate(s);
+    return err === null ? valid(fieldfns.fromText(s)) : invalid([err]);
   }
 
   const veditor: IVEditor<T,string,string,R> = {
     initialState: "",
     stateFromValue: fieldfns.toText,
-    validate,
-    valueFromState: fieldfns.fromText,
+    valueFromState,
     update: (_s,e) => e,
     render: (state, onUpdate) => factory.renderFieldEditor({fieldfns, state, onUpdate}),
   };
@@ -354,20 +351,22 @@ function structVEditor<R>(
     return state;
   }
 
-  function validate(state: StructState) {
+  function valueFromState(state: StructState): Validated<unknown> {
     let errors: string[] = [];
-    for (const fd of fieldDetails) {
-      errors = errors.concat(fd.veditor.validate(state.fieldStates[fd.name]).map(err => fd.name + ": " + err));
-    }
-    return errors;
-  }
-
-  function valueFromState(state: StructState) {
     const value: Record<string,unknown> = {};
     for (const fd of fieldDetails) {
-      value[fd.name] = fd.veditor.valueFromState(state.fieldStates[fd.name]);
+      const vv = fd.veditor.valueFromState(state.fieldStates[fd.name]);
+      if (!vv.isValid) {
+        errors = [...errors, ...vv.errors];
+      } else {
+        value[fd.name] = vv.value;
+      }
     }
-    return value;
+    if (errors.length > 0) {
+      return invalid(errors);
+    } else {
+      return valid(value);
+    }
   }
 
   function update(state: StructState, event: StructEvent): StructState {
@@ -409,7 +408,6 @@ function structVEditor<R>(
   return {
     initialState,
     stateFromValue,
-    validate,
     valueFromState,
     update,
     render
@@ -501,21 +499,18 @@ function unionVEditor<R>(
     };
   }
 
-  function validate(state: UnionState): string[] {
+  function valueFromState(state: UnionState): Validated<SomeUnion> {
     const kind = state.currentField;
     if (kind === null) {
-      return ["selection required"];
+      return invalid(["selection required"]);
     }
-    return veditorsByName[kind]().validate(state.fieldStates[kind]);
-  }
 
-  function valueFromState(state: UnionState): SomeUnion {
-    const kind = state.currentField;
-    if (kind === null) {
-      throw new Error("BUG: union valueFromState called on invalid state");
+    const vv = veditorsByName[kind]().valueFromState(state.fieldStates[kind]);
+    if (vv.isValid) {
+      return valid({kind, value: vv.value});
+    } else {
+      return invalid(vv.errors);
     }
-    const value = veditorsByName[kind]().valueFromState(state.fieldStates[kind]);
-    return { kind, value };
   }
 
   function update(state: UnionState, event: UnionEvent): UnionState {
@@ -584,7 +579,6 @@ function unionVEditor<R>(
   return {
     initialState,
     stateFromValue,
-    validate,
     valueFromState,
     update,
     render
@@ -618,12 +612,8 @@ export function genericVectorVEditor<T,R>(
     return {values:v};
   }
 
-  function validate(_state: VectorState<T>): string[] {
-    return [];
-  }
-
-  function valueFromState(state: VectorState<T>): Vector<T> {
-    return state.values;
+  function valueFromState(state: VectorState<T>): Validated<Vector<T>> {
+    return valid(state.values);
   }
 
   function update(state: VectorState<T>, event: VectorEvent<T>): VectorState<T> {
@@ -635,7 +625,6 @@ export function genericVectorVEditor<T,R>(
     }
     return {values};
   }
-
 
   function render(state: VectorState<T>, onUpdate: UpdateFn<VectorEvent<T>>): R {
     const props: VectorEditorProps<T,R> = {
@@ -650,7 +639,6 @@ export function genericVectorVEditor<T,R>(
   return {
     initialState,
     stateFromValue,
-    validate,
     valueFromState,
     update,
     render
@@ -701,19 +689,16 @@ function maybeVEditor<R>(
     }
   }
 
-  function validate(v: MaybeState): string[] {
+  function valueFromState(v: MaybeState): Validated<SomeMaybe> {
     if (v.isActive) {
-      return uveditor.validate(v.underlying);
+      const vv = uveditor.valueFromState(v.underlying);
+      if (!vv.isValid) {
+        return vv;
+      } else {
+        return valid({kind:"just", value: vv.value});
+      }
     } else {
-      return [];
-    }
-  }
-
-  function valueFromState(v: MaybeState): SomeMaybe {
-    if (v.isActive) {
-      return {kind:"just", value: uveditor.valueFromState(v.underlying)};
-    } else {
-      return {kind:"nothing"}
+      return valid({kind:"nothing"});
     }
   }
 
@@ -741,7 +726,6 @@ function maybeVEditor<R>(
   return {
     initialState,
     stateFromValue,
-    validate,
     valueFromState,
     update,
     render
@@ -753,8 +737,7 @@ function unimplementedVEditor<R>(factory: Factory<R>, typeExpr: adlast.TypeExpr)
     return {
       initialState: null,
       stateFromValue: () => null,
-      validate: () => [],
-      valueFromState: () => null,
+      valueFromState: () => valid(null),
       update: () => {},
       render: () => factory.renderUnimplementedEditor({typeExpr}),
     };
@@ -846,8 +829,7 @@ export function mappedVEditor<A,B,S,E,R>(
   return {
     initialState: veditor.initialState,
     stateFromValue: (b:B) => veditor.stateFromValue(aFromB(b)),
-    validate: veditor.validate,
-    valueFromState: (s:S) => bFromA(veditor.valueFromState(s)),
+    valueFromState: (s:S) => mapValidated( bFromA, veditor.valueFromState(s)),
     update: veditor.update,
     render: veditor.render,
   };

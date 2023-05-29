@@ -13,7 +13,8 @@ import * as adlex from '../adl-gen/examples';
 import { UiFactory } from "./factory";
 
 export default {
-  title: 'VEditors', 
+  title: 'VEditors',
+  includeStories: /^[A-Z]/,    // Stories are exports with upper case names
 };
 
 export const String = () => {
@@ -160,7 +161,7 @@ export const VectorPersonCustomized = () => {
 
 function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial?: T): JSX.Element {
   const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
-  const errs = veditor.validate(state);
+  const vv = veditor.valueFromState(state);
   const rprops = {disabled: !!disabled};
   const elements = veditor.render(state, e => setState((s:unknown) => veditor.update(s,e)))(rprops);
   return (
@@ -168,9 +169,9 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
       <Row><HeaderLabel>Value:</HeaderLabel>{elements.beside}</Row>
       {elements.below}
       <hr/>
-      {errs.length === 0 
-         ? <Valid>Typescript value:<br/><br/>{JSON.stringify(veditor.valueFromState(state), null, 2)}</Valid>
-         : <Errors>Errors:<br/><br/>{errs.join("\n")}</Errors>
+      {vv.isValid 
+         ? <Valid>Typescript value:<br/><br/>{JSON.stringify(vv.value)}</Valid>
+         : <Errors>Errors:<br/><br/>{vv.errors.join("\n")}</Errors>
       }
     </Content>
   );
