@@ -34,7 +34,7 @@ else
 fi
 
 #  Fetch deno if not already downloaded
-denoversion=1.23.4
+denoversion=1.34.1
 release=https://github.com/denoland/deno/releases/download/v$denoversion/deno-$arch.zip
 download=$cachedir/deno-v$denoversion-$arch.zip
 if [ ! -f "$download" ]; then

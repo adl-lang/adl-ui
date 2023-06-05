@@ -1,6 +1,6 @@
 {
   "tasks" : {
-    "local-setup": "deno run --quiet --unstable --allow-all deno/local-setup/main.ts .local"
+    "local-setup": "deno run --quiet --unstable --allow-all deno/local-setup.ts .local",
     "gen-adl" : "deno run --quiet --unstable --allow-all deno/gen-adl.ts"
   }
 }
