@@ -1,8 +1,0 @@
-module common.tabular
-{
-
-import adlc.config.java.*;
-
-annotation JavaPackage "au.com.helixta.adl.common.tabular";
-
-};
