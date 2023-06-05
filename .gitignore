@@ -1,3 +1,4 @@
+src/adl-gen/
 node_modules/
 dist/
 .local/
