@@ -1,8 +1,8 @@
 import {
   getAdlStdLibDir,
   globFiles,
-} from "./adl-tools/utils/fs.ts";;
-import { genTypescript } from "./adl-tools/gen-typescript.ts";
+  genTypescript
+} from "https://deno.land/x/adllang_tsdeno@v0.1/mod.ts";
 
 async function main() {
   const adlStdLibDir = await getAdlStdLibDir();
