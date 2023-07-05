@@ -13,9 +13,7 @@ localdir=$reporoot/.local
 localbin=$localdir/bin
 
 pathadd() {
-    if [[ ":$PATH:" != *":$1:"* ]]; then
-        PATH="$1${PATH:+":$PATH"}"
-    fi
+    PATH="$1${PATH:+":$PATH"}"
 }
 
 pathadd $localbin
@@ -23,11 +21,11 @@ pathadd $localbin
 if [ "`uname`" = "Darwin" ]; then
   platform=osx
   arch=x86_64-apple-darwin
-  cachedir=$HOME/Library/Caches/hxtools
+  cachedir=$HOME/Library/Caches/localtools
 elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
   platform=linux
   arch=x86_64-unknown-linux-gnu
-  cachedir=$HOME/.cache/hxtools
+  cachedir=$HOME/.cache/localtools
 else
   echo "ERROR: Unable to download tooling for platform"
   return 1
@@ -51,6 +49,6 @@ if [ ! -f "$localdir/bin/deno" ]; then
 fi
 
 # Now use a deno script to install all other local tooling
-deno task local-setup
+deno run --quiet --unstable --allow-all $reporoot/deno/local-setup.ts $localdir
 source $localdir/bin/local-env.sh
 

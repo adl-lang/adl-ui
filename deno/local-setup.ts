@@ -3,7 +3,7 @@ import {
   forPlatform,
   getHostPlatform,
   installTo
-} from "https://deno.land/x/adllang_localsetup@v0.5/mod.ts";
+} from "https://deno.land/x/adllang_localsetup@v0.6/mod.ts";
 
 const DENO = packages.deno("1.34.1");
 const ADL = packages.adl("1.1.12");
