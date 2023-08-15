@@ -1,10 +1,10 @@
 
 import { boolFieldFns, intFieldFns, jsonFieldFns, numberFieldFns, stringFieldFns } from "./primitive";
 import { FieldFns } from "./type";
-import * as systypes from "../../adl-gen/sys/types";
-import * as adlrt  from "../../adl-gen/runtime/adl";
-import * as adlast from "../../adl-gen/sys/adlast";
-import { createJsonBinding, jsonParseException } from "../../adl-gen/runtime/json";
+import * as systypes from "@/adl-gen/sys/types";
+import * as adlrt  from "@/adl-gen/runtime/adl";
+import * as adlast from "@/adl-gen/sys/adlast";
+import { createJsonBinding, jsonParseException } from "@/adl-gen/runtime/json";
 
 const _primitiveFieldFns: Record<string, FieldFns<unknown>> = {
   String: stringFieldFns,

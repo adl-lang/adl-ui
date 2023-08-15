@@ -1,10 +1,10 @@
 import  { useState } from "react";
 import styled from 'styled-components';
-import { isJsonParseException } from '../adl-gen/runtime/json';
+import { isJsonParseException } from '@/adl-gen/runtime/json';
 import { Button } from "./button";
 import { Toggle } from "./toggle";
 
-import { JsonBinding } from "../adl-gen/runtime/json";
+import { JsonBinding } from "@/adl-gen/runtime/json";
 import { VEditor } from "./veditor";
 
 // A form for entry of an arbirary ADL value . It is provided with an initial value and its

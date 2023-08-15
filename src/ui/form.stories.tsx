@@ -1,14 +1,14 @@
 import { storiesOf } from '@storybook/react';
-import {RESOLVER} from "../adl-gen/resolver";
+import {RESOLVER} from "@/adl-gen/resolver";
 import {createVEditor } from "../model/veditor/adlfactory";
 
-import * as adlex from '../adl-gen/examples';
-import * as adlrt  from "../adl-gen/runtime/adl";
+import * as adlex from '@/adl-gen/examples';
+import * as adlrt  from "@/adl-gen/runtime/adl";
 
 import { UiFactory } from "./factory";
 import { AdlFormState, createAdlFormState } from './form';
 import { AdlForm } from './form';
-import { createJsonBinding } from '../adl-gen/runtime/json';
+import { createJsonBinding } from '@/adl-gen/runtime/json';
 import { customizedHierarchyVector, customizedPersonVector } from './veditor.stories';
 
 export default {

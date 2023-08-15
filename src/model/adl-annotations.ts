@@ -1,11 +1,11 @@
 // Helper functions to extract various ADL annotations
-import * as tabular from "../adl-gen/common/tabular";
-import * as ui from "../adl-gen/common/ui";
-import { DeclResolver } from "../adl-gen/runtime/adl";
-import { createJsonBinding, JsonBinding } from "../adl-gen/runtime/json";
-import { typeExprsEqual } from "../adl-gen/runtime/utils";
-import * as adlast from "../adl-gen/sys/adlast";
-import * as systypes from "../adl-gen/sys/types";
+import * as tabular from "@/adl-gen/common/tabular";
+import * as ui from "@/adl-gen/common/ui";
+import { DeclResolver } from "@/adl-gen/runtime/adl";
+import { createJsonBinding, JsonBinding } from "@/adl-gen/runtime/json";
+import { typeExprsEqual } from "@/adl-gen/runtime/utils";
+import * as adlast from "@/adl-gen/sys/adlast";
+import * as systypes from "@/adl-gen/sys/types";
 
 type Json = {} | null;
 

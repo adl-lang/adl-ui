@@ -1,12 +1,12 @@
-import * as adlrt  from "../../adl-gen/runtime/adl";
-import * as adlast from "../../adl-gen/sys/adlast";
-import * as systypes from "../../adl-gen/sys/types";
+import * as adlrt  from "@/adl-gen/runtime/adl";
+import * as adlast from "@/adl-gen/sys/adlast";
+import * as systypes from "@/adl-gen/sys/types";
+import { createJsonBinding } from '@/adl-gen/runtime/json';
+import {scopedNamesEqual} from "@/adl-gen/runtime/utils";
 import * as adltree from "../adl-tree";
-import { createJsonBinding } from '../../adl-gen/runtime/json';
 
 import {IVEditor, OVEditor, UpdateFn, Validated, invalid, mapValidated, valid} from "./type";
 import {FieldFns} from "../fields/type";
-import {scopedNamesEqual} from "../../adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
 import { SelectState } from "../../ui/select";
 import { getAdlTableInfo, Column, cellContent } from "../adl-table";

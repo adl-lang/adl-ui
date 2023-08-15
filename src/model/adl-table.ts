@@ -10,10 +10,10 @@ import {
   SortDirection,
   SortField,
   TableView
-} from "../adl-gen/common/tabular";
-import { ATypeExpr, DeclResolver, ScopedDecl } from "../adl-gen/runtime/adl";
-import { isEnum } from "../adl-gen/runtime/utils";
-import * as adlast from "../adl-gen/sys/adlast";
+} from "@/adl-gen/common/tabular";
+import { ATypeExpr, DeclResolver, ScopedDecl } from "@/adl-gen/runtime/adl";
+import { isEnum } from "@/adl-gen/runtime/utils";
+import * as adlast from "@/adl-gen/sys/adlast";
 import * as adltree from "./adl-tree";
 import { CustomContext, fieldLabel } from "./veditor/adlfactory";
 

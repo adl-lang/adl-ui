@@ -2,8 +2,8 @@ import styled from 'styled-components';
 
 import { TypedFieldState, useTypedFieldState } from "../model/fields/hooks";
 import {createAdlField} from "../model/fields/adl";
-import {texprHierarchy, texprPerson} from "../adl-gen/examples";
-import {RESOLVER} from "../adl-gen/resolver";
+import {texprHierarchy, texprPerson} from "@/adl-gen/examples";
+import {RESOLVER} from "@/adl-gen/resolver";
 
 export default {
   title: 'Fields', 

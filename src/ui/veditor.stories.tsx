@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import styled from 'styled-components';
-import * as adlrt  from "../adl-gen/runtime/adl";
-import * as adlsys from "../adl-gen/sys/types";
+import * as adlrt  from "@/adl-gen/runtime/adl";
+import * as adlsys from "@/adl-gen/sys/types";
 
 
-import {RESOLVER} from "../adl-gen/resolver";
+import {RESOLVER} from "@/adl-gen/resolver";
 import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../model/veditor/adlfactory";
 import {Column, cellContent} from "../model/adl-table";
 import { RenderFn, VEditor } from './veditor';
-import { typeExprsEqual } from '../adl-gen/runtime/utils';
-import * as adlex from '../adl-gen/examples';
+import { typeExprsEqual } from '@/adl-gen/runtime/utils';
+import * as adlex from '@/adl-gen/examples';
 import { UiFactory } from "./factory";
 
 export default {
