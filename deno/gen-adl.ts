@@ -9,10 +9,13 @@ async function main() {
 
   await genTypescript({
     adlModules: [
+      'common',
+      'common.strings',
       'common.tabular',
       'common.ui',
       'sys.types',
       'sys.adlast',
+      'examples',
     ],
     searchPath: [
       adlDir
