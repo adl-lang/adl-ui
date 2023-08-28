@@ -87,7 +87,7 @@ export function intFieldFns(minValue: number | null, maxValue: number | null): F
 
 
 // An arbitrary number
-export function numberFieldFns(): FieldFns<number> {
+export function numberFieldFns(minValue: number | null, maxValue: number | null): FieldFns<number> {
   const re = new RegExp('^\\s*[+-]?\\d+(\\.\\d+)?\\s*$');
   return {
     toText(v) {
@@ -97,10 +97,16 @@ export function numberFieldFns(): FieldFns<number> {
       if (text.match(re)) {
         const v = parseFloat(text);
         if (!isNaN(v)) {
-          return null;
+          if (typeof(minValue) === 'number' && v < minValue) {
+            return `value too small (min ${minValue})`;
+          } else if (typeof(maxValue) === 'number' && v > maxValue) {
+            return `value too big (max ${maxValue})`;
+          } else {
+            return null;
+          }
         }
       }
-      return "must be a number";
+      return "value must be a number";
     },
     fromText(text) {
       return parseFloat(text);
@@ -111,7 +117,7 @@ export function numberFieldFns(): FieldFns<number> {
   };
 }
 
-export const NUMBER_FIELD: FieldFns<number> = numberFieldFns();
+export const NUMBER_FIELD: FieldFns<number> = numberFieldFns(null, null);
 
 
 // A BigDecimal field, which is stored as a string

@@ -9,10 +9,9 @@ async function main() {
 
   await genTypescript({
     adlModules: [
-      'common',
       'common.strings',
-      'common.tabular',
       'common.ui',
+      'common.time',
       'sys.types',
       'sys.adlast',
       'examples',

@@ -1,7 +1,6 @@
 // Helper functions to extract various ADL annotations
-import * as tabular from "@/adl-gen/common/tabular";
-import * as ui from "@/adl-gen/common/ui";
 import { DeclResolver } from "@/adl-gen/runtime/adl";
+import * as ui from "@/adl-gen/common/ui";
 import { createJsonBinding, JsonBinding } from "@/adl-gen/runtime/json";
 import { typeExprsEqual } from "@/adl-gen/runtime/utils";
 import * as adlast from "@/adl-gen/sys/adlast";
@@ -41,13 +40,6 @@ export function getFormLabelFromAnnotation(
   return getAnnotation(field.annotations, jb);
 }
 
-export function getTableViewFromAnnotation(
-  dresolver: DeclResolver,
-  decl: adlast.Decl
-): tabular.TableView | null {
-  const jb = createJsonBinding(dresolver, tabular.texprTableView());
-  return getAnnotation(decl.annotations, jb);
-}
 
 export function getFormGroupsFromAnnotation(
   dresolver: DeclResolver,

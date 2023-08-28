@@ -16,8 +16,8 @@ const _primitiveFieldFns: Record<string, FieldFns<unknown>> = {
   Word16: intFieldFns(0, 65535),
   Word32: intFieldFns(0, 4294967295),
   Word64: intFieldFns(0, null),
-  Float: numberFieldFns(),
-  Double: numberFieldFns(),
+  Float: numberFieldFns(null, null),
+  Double: numberFieldFns(null, null),
   Bool: boolFieldFns(),
   Json: jsonFieldFns()
 };
