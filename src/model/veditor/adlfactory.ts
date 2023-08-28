@@ -8,7 +8,7 @@ import {IVEditor, OVEditor, UpdateFn, Validated, invalid, mapValidated, valid} f
 import {FieldFns} from "../fields/type";
 import {scopedNamesEqual} from "@/adl-gen/runtime/utils";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
-import { SelectState } from "../../ui/select";
+import { SelectState } from "../select";
 import { getAdlTableInfo, Column, cellContent } from "../adl-table";
 
 /**
