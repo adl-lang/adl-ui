@@ -1,9 +1,9 @@
-import { Button } from './button';
+import { Button } from '../ui/button';
 import styled from "styled-components";
 
 
 export default {
-  title: 'Button', 
+  title: 'ui/Button', 
   component: Button,
 };
 

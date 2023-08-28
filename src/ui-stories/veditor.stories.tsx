@@ -7,13 +7,13 @@ import * as adlsys from "@/adl-gen/sys/types";
 import {RESOLVER} from "@/adl-gen/resolver";
 import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../model/veditor/adlfactory";
 import {Column, cellContent} from "../model/adl-table";
-import { RenderFn, VEditor } from './veditor';
+import { RenderFn, VEditor } from '../ui/veditor';
 import { typeExprsEqual } from '@/adl-gen/runtime/utils';
 import * as adlex from '@/adl-gen/examples';
-import { UiFactory } from "./factory";
+import { UiFactory } from "../ui/factory";
 
 export default {
-  title: 'VEditors',
+  title: 'ui/VEditors',
   includeStories: /^[A-Z]/,    // Stories are exports with upper case names
 };
 

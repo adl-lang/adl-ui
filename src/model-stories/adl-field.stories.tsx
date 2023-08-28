@@ -6,7 +6,7 @@ import {texprHierarchy, texprPerson} from "@/adl-gen/examples";
 import {RESOLVER} from "@/adl-gen/resolver";
 
 export default {
-  title: 'Fields', 
+  title: 'model/Fields', 
 };
 
 export const JsonPerson = () => {

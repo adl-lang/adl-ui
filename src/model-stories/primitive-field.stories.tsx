@@ -4,7 +4,7 @@ import { TypedFieldState, useTypedFieldState } from "../model/fields/hooks";
 import {STRING_FIELD, NUMBER_FIELD, BOOLEAN_FIELD, intFieldFns, NON_EMPTY_STRING_FIELD, JSON_FIELD} from "../model/fields/primitive";
 
 export default {
-  title: 'Fields', 
+  title: 'model/Fields', 
 };
 
 export const String = () => {

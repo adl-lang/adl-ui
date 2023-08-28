@@ -1,9 +1,8 @@
 
-import { useSelectState } from "./select";
-import { Select } from './select';
+import { useSelectState, Select } from "../ui/select";
 
 export default {
-  title: 'Select', 
+  title: 'ui/Select', 
   component: Select,
 };
 

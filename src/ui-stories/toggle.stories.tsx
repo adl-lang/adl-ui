@@ -1,10 +1,9 @@
 
-import { storiesOf } from '@storybook/react';
-import React, { useState } from 'react'
-import { Toggle } from './toggle';
+import { useState } from 'react'
+import { Toggle } from '../ui/toggle';
 
 export default {
-  title: 'Toggle', 
+  title: 'ui/Toggle', 
   component: Toggle,
 };
 

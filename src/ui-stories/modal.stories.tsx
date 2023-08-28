@@ -1,11 +1,10 @@
 
-import { storiesOf } from '@storybook/react';
-import React, { useState } from 'react'
-import { Modal } from './modal';
-import { Button } from './button';
+import { useState } from 'react'
+import { Modal } from '../ui/modal';
+import { Button } from '../ui/button';
 
 export default {
-  title: 'Modal', 
+  title: 'ui/Modal', 
   component: Modal,
 };
 
