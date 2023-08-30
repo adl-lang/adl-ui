@@ -4,11 +4,10 @@ A toolkit for generating user interface components from ADL type definitions.
 
 ## code structure
 
-`model/` - the underlying state and events for adl derived UI elements
-`ui/` - a view implementation in terms of raw styled components
-`mui/` - a view implementation in terms of the material ui framework
-
-`*-stories/` - storybook stories for each of the above
+* `model/` - the underlying state and events for adl derived UI elements
+* `ui/` - a view implementation in terms of raw styled components
+* `mui/` - a view implementation in terms of the material ui framework
+* `*-stories/` - storybook stories for each of the above
 
 in any given application either model+ui or model+mui should be used
 
