@@ -335,8 +335,7 @@ const StructGridLabel = styled('div')({
    flexDirection: 'row',
    gridColumnStart: '1',
    gridColumnEnd: '1',
-   alignSelf: 'center',
-   margin: '10px 0px 10px 0px',
+   marginTop: '20px',
 });
 
 const StructGridValue = styled('div')({
@@ -350,6 +349,7 @@ const StructGridWideValue = styled('div')({
    flexDirection: 'row',
    gridColumnStart: '1',
    gridColumnEnd: '3',
+   marginTop: '10px',
 });
 
 const RowControls = styled('div')({
