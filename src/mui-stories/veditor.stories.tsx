@@ -11,6 +11,7 @@ import { RenderFn, VEditor } from '../mui/veditor';
 import { typeExprsEqual } from '@/adl-gen/runtime/utils';
 import * as adlex from '@/adl-gen/examples';
 import { UiFactory } from "../mui/factory";
+import { Box } from '@mui/material';
 
 export default {
   title: 'mui/VEditors',
@@ -165,14 +166,15 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
   const rprops = {disabled: !!disabled};
   const renderv = veditor.render(state, e => setState((s:unknown) => veditor.update(s,e)))(rprops);
   return (
-    <Content>
+    <div>
       {renderv.element()}
+      <Box sx={{height:"20px"}}/>
       <hr/>
       {vv.isValid 
          ? <Valid>Typescript value:<br/><br/>{JSON.stringify(vv.value)}</Valid>
          : <Errors>Errors:<br/><br/>{vv.errors.join("\n")}</Errors>
       }
-    </Content>
+    </div>
   );
 }
 
@@ -236,38 +238,11 @@ export function customizedHierarchyVector(factory: Factory<RenderFn>): VEditorCu
   }
 }
 
-
-const Content = styled.div`
-`;
-
-const Row = styled.div`
-display: flex;
-flex-direction: row;
-align-items: center;
-margin-bottom: 5px;
-`;
-
-const HeaderLabel = styled.div`
-margin-right: 10px;
-font-weight: bold;
-`;
-
 const Valid = styled.pre`
  color: green;
 `;
 
 const Errors = styled.pre`
-color: #b71c1c;
-`;
-
-const StyledInput = styled.input`
-padding: 8px;
-border: 1px solid #000;
-border-radius: 4px;
-`;
-  
-const StyledError = styled.div`
-padding-left: calc(2* 8px);
 color: #b71c1c;
 `;
 

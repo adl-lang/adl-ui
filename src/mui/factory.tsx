@@ -17,7 +17,7 @@ import { createAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
 import { GridRow, Rendered, RenderFn, RenderProps, VEditor } from './veditor';
-import { Box, TextField } from '@mui/material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 
 export function fieldElement(element:JSX.Element): Rendered {
   return {
@@ -255,7 +255,7 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
   }
 
   const headers = props.columns.map((c) => {
-    return <TH key={c.id}>{renderContent(c.header)}</TH>;
+    return <TableCell key={c.id}>{renderContent(c.header)}</TableCell>;
   });
   const hcontrols = (
     <RowControls>
@@ -265,7 +265,7 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
 
   const rows = props.values.map((v,i) => {
     const row = props.columns.map( (c) => {
-      return <TD key={c.id}>{renderContent(c.content(v,i))}</TD>;
+      return <TableCell key={c.id}>{renderContent(c.content(v,i))}</TableCell>;
     });
     
     const canMoveUp = i > 0;
@@ -279,17 +279,19 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
         <DeleteIcon onClick={() => deleteItem(i)}/>
       </RowControls>
     );
-    return <TR key={i.toString()}>{row}<TD>{controls}</TD></TR>;
+    return <TableRow key={i.toString()}>{row}<TableCell>{controls}</TableCell></TableRow>;
   });
 
   return (
-    <div>
+    <TableContainer >
       {renderModal()}
-      <Table>
-        <THead><TR>{headers}<TH>{hcontrols}</TH></TR></THead>
-        <TBody>{rows}</TBody>
+      <Table size="small">
+        <TableHead>
+          <TableRow>{headers}<TableCell>{hcontrols}</TableCell></TableRow>
+        </TableHead>
+        <TableBody>{rows}</TableBody>
       </Table>
-    </div>
+    </TableContainer>
   );
 }
 
@@ -349,30 +351,6 @@ const StructGridWideValue = styled.div`
    flex-direction: row;
    grid-column-start: 1;
    grid-column-end: 3;
-`;
-
-const Table = styled.table`
-   border: 1px solid;
-   border-collapse: collapse;
-   text-align: left;
-`;
-
-const THead = styled.thead`
-   background: lightgray;
-`;
-
-const TBody = styled.tbody``;
-
-const TR = styled.tr`
-   border: 1px solid;
-`;
-
-const TD = styled.td`
-   padding: 8px;
-`;
-
-const TH = styled.th`
-   padding: 8px;
 `;
 
 const RowControls = styled.div`
