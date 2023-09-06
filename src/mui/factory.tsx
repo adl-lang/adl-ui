@@ -1,6 +1,4 @@
-
-import React from 'react'
-import styled from 'styled-components';
+import * as React from 'react'
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -17,7 +15,8 @@ import { createAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
 import { GridRow, Rendered, RenderFn, RenderProps, VEditor } from './veditor';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { styled } from "@mui/system";
 
 export function fieldElement(element:JSX.Element): Rendered {
   return {
@@ -325,36 +324,36 @@ function renderStructRows(indent: number, rows: GridRow[]): JSX.Element[] {
   return elements;
 }
 
-const StructGrid = styled.div`
-   display: grid;
-   grid-template-columns: auto 1fr;
-  grid-column-gap: 20px;
-`;
+const StructGrid = styled('div')({
+   display: 'grid',
+   gridTemplateColumns: 'auto 1fr',
+   gridColumnGap: '20px',
+});
 
-const StructGridLabel = styled.div`
-   display: flex;
-   flex-direction: row;
-   grid-column-start: 1;
-   grid-column-end: 1;
-   align-self: center;
-   margin: 10px 0px 10px 0px;
-`;
+const StructGridLabel = styled('div')({
+   display: 'flex',
+   flexDirection: 'row',
+   gridColumnStart: '1',
+   gridColumnEnd: '1',
+   alignSelf: 'center',
+   margin: '10px 0px 10px 0px',
+});
 
-const StructGridValue = styled.div`
-   grid-column-start: 2;
-   grid-column-end: 2;
-   margin-top: 10px;
-`;
+const StructGridValue = styled('div')({
+   gridColumnStart: '2',
+   gridColumnEnd: '2',
+   marginTop: '10px',
+});
 
-const StructGridWideValue = styled.div`
-   display: flex;
-   flex-direction: row;
-   grid-column-start: 1;
-   grid-column-end: 3;
-`;
+const StructGridWideValue = styled('div')({
+   display: 'flex',
+   flexDirection: 'row',
+   gridColumnStart: '1',
+   gridColumnEnd: '3',
+});
 
-const RowControls = styled.div`
-   display: flex;
-   flex-direction: row;
-   gap: 5px;
-`
+const RowControls = styled('div')({
+   display: 'flex',
+   flexDirection: 'row',
+   gap: '5px',
+});

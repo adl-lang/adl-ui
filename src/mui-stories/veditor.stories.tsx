@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import styled from 'styled-components';
 import * as adlrt  from "@/adl-gen/runtime/adl";
 import * as adlsys from "@/adl-gen/sys/types";
 
@@ -11,7 +10,7 @@ import { RenderFn, VEditor } from '../mui/veditor';
 import { typeExprsEqual } from '@/adl-gen/runtime/utils';
 import * as adlex from '@/adl-gen/examples';
 import { UiFactory } from "../mui/factory";
-import { Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 export default {
   title: 'mui/VEditors',
@@ -238,11 +237,11 @@ export function customizedHierarchyVector(factory: Factory<RenderFn>): VEditorCu
   }
 }
 
-const Valid = styled.pre`
- color: green;
-`;
+const Valid = styled('pre')({
+  color: 'green'
+});
 
-const Errors = styled.pre`
-color: #b71c1c;
-`;
+const Errors = styled('pre')({
+  color: '#b71c1c'
+});
 

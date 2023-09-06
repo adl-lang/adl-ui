@@ -1,9 +1,8 @@
 import  { useState } from "react";
-import styled from 'styled-components';
 import { isJsonParseException, JsonBinding } from '@/adl-gen/runtime/json';
 import { Toggle } from "./toggle";
 import { VEditor } from "./veditor";
-import { Button, TextField } from "@mui/material";
+import { Button, styled, TextField } from "@mui/material";
 
 // A form for entry of an arbirary ADL value . It is provided with an initial value and its
 // ADL type. The onApply() callback is made when the user presses the apply button on validated
@@ -364,24 +363,24 @@ function FormVEditor(props: {
   return rendered.element();
 }
 
-const ErrLabel = styled.label`
-  color: red;
-`;
+const ErrLabel = styled('label')({
+  color: 'red',
+});
 
-const ActionBar = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`
+const ActionBar = styled('div')({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+});
 
-const ActionGroup = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-left: 20px;
-`
+const ActionGroup = styled('div')({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: '10px',
+  marginLeft: '20px',
+});
 
 const RawJsonEditor = (props: {
   disabled?: boolean,
