@@ -4,7 +4,7 @@ import {createVEditor } from "../model/veditor/adlfactory";
 import * as adlex from '@/adl-gen/examples';
 import * as adlrt  from "@/adl-gen/runtime/adl";
 
-import { UiFactory } from "../ui/factory";
+import { UiFactory } from "../mui/factory";
 import { AdlFormState, createAdlFormState } from '../mui/form';
 import { AdlForm } from '../mui/form';
 import { createJsonBinding } from '@/adl-gen/runtime/json';
