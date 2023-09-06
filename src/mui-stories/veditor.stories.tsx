@@ -163,11 +163,10 @@ function renderVEditorStory<T>(veditor: VEditor<T>, disabled?: boolean,  initial
   const [state,setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const vv = veditor.valueFromState(state);
   const rprops = {disabled: !!disabled};
-  const elements = veditor.render(state, e => setState((s:unknown) => veditor.update(s,e)))(rprops);
+  const renderv = veditor.render(state, e => setState((s:unknown) => veditor.update(s,e)))(rprops);
   return (
     <Content>
-      <Row><HeaderLabel>Value:</HeaderLabel>{elements.beside}</Row>
-      {elements.below}
+      {renderv.element()}
       <hr/>
       {vv.isValid 
          ? <Valid>Typescript value:<br/><br/>{JSON.stringify(vv.value)}</Valid>

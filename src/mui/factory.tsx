@@ -16,22 +16,37 @@ import { CellContent } from '../model/adl-table';
 import { createAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
-import { RenderFn, RenderProps, VEditor } from './veditor';
-import { TextField } from '@mui/material';
+import { GridRow, Rendered, RenderFn, RenderProps, VEditor } from './veditor';
+import { Box, TextField } from '@mui/material';
 
+export function fieldElement(element:JSX.Element): Rendered {
+  return {
+    element: () => {return element},
+    gridElement: () => {return {beside:element}},
+  };    
+}
+
+export function wideFieldElement(element:JSX.Element): Rendered {
+  return {
+    element: () => {return element},
+    gridElement: () => {return {below: [{kind:'wide', element}]}},
+  };    
+}
+  
+ 
 export class UiFactory implements Factory<RenderFn> {
    veditorCustomize: VEditorCustomize<RenderFn>[] = [];
    fieldCustomize: FieldCustomize[] = [];
   
   renderVoidEditor(): RenderFn {
-    return () => ({});
+    return () => fieldElement(<div/>);
   }
   
   renderFieldEditor(props: FieldEditorProps): RenderFn {
     return ({disabled}: RenderProps) => {
       const {fieldfns, state, onUpdate} = props;
       const errlabel = fieldfns.validate(state);
-      const beside = (
+      const element = (
         <TextField 
           size="small" 
           fullWidth
@@ -42,81 +57,90 @@ export class UiFactory implements Factory<RenderFn> {
           disabled={disabled}
         />
         );
-      return {beside};    
-    }     
+      return fieldElement(element);
+    }
   }
   
   renderStructEditor(props: StructEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
-      const rows = props.fields.map(fd => {
+      const rows: GridRow[] = props.fields.map(fd => {
         const label = rprops.disabled? fd.label : <b>{fd.label}</b>;
         const rendered = fd.veditor.veditor.render(fd.veditor.state, fd.veditor.onUpdate)(rprops);
-        const x = <></>;
-        return (
-          <React.Fragment key={fd.name}>
-            <tr>
-              <StructFieldLabel>
-                <label>{label}</label>
-              </StructFieldLabel>
-              {rendered.beside && <StructFieldBeside>{rendered.beside}</StructFieldBeside>}
-            </tr>
-            {rendered.below && <tr><StructFieldBelow colSpan={2}>{rendered.below}</StructFieldBelow></tr>}
-          </React.Fragment>
-        );
+        const element = rendered.gridElement();
+        return {kind:'labelled', label, element} as GridRow
       });
-      const below = (
-        <StructContent>
-          <tbody>{rows}</tbody>
-        </StructContent>
-      );
-      return {below};
+
+      return {
+        element: () => {
+          return <StructGrid>{renderStructRows(0, rows)}</StructGrid>;
+        },
+        gridElement: () => {
+          return {
+            below: rows
+          }
+        }
+      }
     }
   }
   
   renderUnionEditor(props: UnionEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
-      const beside = <Select state={props.selectState}/>;
-      if( !props.veditor) {
-        return {beside};
-      }
-      const r = props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
-      const below = <div>{r.beside}{r.below}</div>;
+      const select= <Select state={props.selectState}/>;
+      const underlying = props.veditor && props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
       return {
-        beside,
-        below
+        element: () => {
+          return <div>{select}{underlying?.element()}</div>;
+        },
+        gridElement: () => {
+          const ugrid = underlying?.gridElement();
+          const below = !ugrid
+            ? []
+            : [
+              ...wideGridRow(ugrid.beside),
+              ...(ugrid.below || [])
+            ];
+          return {
+            beside: select,
+            below,
+          }
+        },
       }
     }
   }
   
   renderMaybeEditor(props: MaybeEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
-      const beside = <Toggle disabled={rprops.disabled} checked={props.isActive} onChange={props.toggleIsActive}/>;
-      if (!props.isActive) {
-        return {beside};
-      }
-      const r = props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
-      const below = <div>{r.beside}{r.below}</div>;
+      const toggle = <Toggle disabled={rprops.disabled} checked={props.isActive} onChange={props.toggleIsActive}/>;
+      const underlying = props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
       return {
-        beside,
-        below
+        element: () => {
+          return <div>{toggle}{props.isActive && underlying.element()}</div>;
+        },
+        gridElement: () => {
+          const ugrid = underlying.gridElement();
+          const below = !props.isActive
+            ? []
+            : [
+              ...wideGridRow(ugrid.beside),
+              ...(ugrid.below || [])
+            ];
+          return {
+            beside: toggle,
+            below,
+          }
+        },
       }
     }
   }
   
   renderVectorEditor<T>(props: VectorEditorProps<T, RenderFn>): RenderFn {
-    return (_rprops: RenderProps) => {
-      const below = <VectorVeditor {...props}/>;
-      return {below}; 
-    }
+    return (_rprops: RenderProps) => wideFieldElement(<VectorVeditor {...props}/>);
   }
   
   renderUnimplementedEditor(props: UnimplementedEditorProps): RenderFn {
-    return (_rprops: RenderProps) => {
-      return {
-        beside: <div>unimplemented veditor for {typeExprToStringUnscoped(props.typeExpr)}</div>,
-        below: undefined,
-      }
-    }
+    return (_rprops: RenderProps) => wideFieldElement(
+      <div>unimplemented veditor for {typeExprToStringUnscoped(props.typeExpr)}</div>,
+    )
   }
 
   addCustomVEditor(vc : VEditorCustomize<RenderFn>) {
@@ -189,10 +213,6 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
 
   function moveItemDown(i: number) {
     props.splice(i, 2, [props.values[i+1], props.values[i]]);
-  }
-
-  function iconColor(enabled: boolean): string {
-    return enabled ? "black" : "lightGrey"
   }
 
   function insertItemAfter(i: number) {
@@ -273,16 +293,62 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
   );
 }
 
-const Row = styled.div`
-display: flex;
-flex-direction: row;
-align-items: center;
-margin-bottom: 5px;
+function wideGridRow(element: JSX.Element | undefined): GridRow[] {
+  if (element) {
+    return [{kind:'wide', element}];
+  }
+  return [];
+}
+
+function renderStructRows(indent: number, rows: GridRow[]): JSX.Element[] {
+  const elements: JSX.Element[] = [];
+  const indentElement = indent == 0 ? undefined : <Box sx={{width:`${indent * 30}px`}} />;
+  for(const row of rows) {
+    if (row.kind === 'wide') {
+      elements.push(
+        <StructGridWideValue>{indentElement}{row.element}</StructGridWideValue>
+      );
+    } else if (row.kind === 'labelled') {
+      elements.push(
+        <>
+          <StructGridLabel>{indentElement}{row.label}</StructGridLabel>
+          {row.element.beside && <StructGridValue>{row.element.beside}</StructGridValue>}
+        </>
+      );
+      if (row.element.below) {
+        elements.push(...renderStructRows(indent+1,row.element.below));
+      }
+    }
+  }
+  return elements;
+}
+
+const StructGrid = styled.div`
+   display: grid;
+   grid-template-columns: auto 1fr;
+  grid-column-gap: 20px;
 `;
 
-const StyledError = styled.div`
-padding-left: calc(2* 8px);
-color: #b71c1c;
+const StructGridLabel = styled.div`
+   display: flex;
+   flex-direction: row;
+   grid-column-start: 1;
+   grid-column-end: 1;
+   align-self: center;
+   margin: 10px 0px 10px 0px;
+`;
+
+const StructGridValue = styled.div`
+   grid-column-start: 2;
+   grid-column-end: 2;
+   margin-top: 10px;
+`;
+
+const StructGridWideValue = styled.div`
+   display: flex;
+   flex-direction: row;
+   grid-column-start: 1;
+   grid-column-end: 3;
 `;
 
 const Table = styled.table`
@@ -314,25 +380,3 @@ const RowControls = styled.div`
    flex-direction: row;
    gap: 5px;
 `
-
-
-
-const StructContent = styled.table`
-  border-collapse: collapse;
-  border-style: hidden;
-  width: 100%;
-`;
-
-const StructFieldLabel = styled.td`
-  padding: 5px;
-`;
-
-const StructFieldBeside = styled.td`
-  padding: 5px;
-`;
-
-const StructFieldBelow = styled.td`
-  padding-left: 50px;
-`;
-
-

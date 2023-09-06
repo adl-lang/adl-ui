@@ -361,10 +361,7 @@ function FormVEditor(props: {
     props.veditorState,
     props.onUpdate
   )({disabled: !!props.disabled});
-  return <div>
-    {rendered.beside}
-    {rendered.below}
-  </div>;
+  return rendered.element();
 }
 
 const ErrLabel = styled.label`
