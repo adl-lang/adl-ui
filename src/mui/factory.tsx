@@ -258,7 +258,7 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
   });
   const hcontrols = (
     <RowControls>
-      <AddIcon onClick={() => insertItemAfter(props.values.length - 1)}/>
+      <AddIcon fontSize="small" onClick={() => insertItemAfter(props.values.length - 1)}/>
     </RowControls>
   );
 
@@ -272,10 +272,10 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
     
     const controls = (
       <RowControls>
-        <EditIcon onClick={() => editItem(i)}/>
-        <ArrowUpwardIcon onClick={() => canMoveUp && moveItemUp(i)}/>
-        <ArrowDownwardIcon onClick={() => canMoveDown && moveItemDown(i)}/>
-        <DeleteIcon onClick={() => deleteItem(i)}/>
+        <EditIcon fontSize="small" onClick={() => editItem(i)}/>
+        <ArrowUpwardIcon fontSize="small" onClick={() => canMoveUp && moveItemUp(i)}/>
+        <ArrowDownwardIcon fontSize="small" onClick={() => canMoveDown && moveItemDown(i)}/>
+        <DeleteIcon fontSize="small" onClick={() => deleteItem(i)}/>
       </RowControls>
     );
     return <TableRow key={i.toString()}>{row}<TableCell>{controls}</TableCell></TableRow>;
