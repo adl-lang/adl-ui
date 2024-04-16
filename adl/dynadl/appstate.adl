@@ -1,0 +1,21 @@
+module dynadl.appstate {
+
+import common.ui.ValidRegex;
+import common.ui.ValidValues;
+import common.ui.FormLabel;
+
+struct Dictionary {
+    String name;
+    dynadl.ast.Fields fields;
+};
+
+struct SetFields {
+    @FormLabel "Module"
+    String moduleName;
+    String name;
+    dynadl.ast.Fields fields;
+    Int64 version;
+    Int32 previewIdx;
+};
+
+};

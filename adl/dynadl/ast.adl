@@ -1,0 +1,297 @@
+module dynadl.ast {
+
+import sys.types.Pair;
+
+import common.ui.FormLabel;
+import common.ui.ValidRegex;
+import common.ui.ValidValues;
+import common.ui.FormGroups;
+import common.ui.FormGroupKey;
+import common.strings.StringNE;
+
+// import dynadl.expression.Expression;
+
+import dynadl.types.Ident;
+import dynadl.types.ModuleName;
+
+struct Dictionary {
+  Fields fields;
+  Int64 version = 0;
+};
+
+type Fields = Vector<Field>;
+
+struct Field {
+    Ident name;
+    Nullable<FormLabel> form_label = null;
+    Nullable<FormGroupKey> form_group_key = null;
+    // modelling wise it doesn't work to up arity here
+    // Multiplicity multiplicity = "required";
+    UITypeExpr fieldType = {
+      "primitive": {
+        "string_field": {
+          "required": {
+            "validation": null,
+            "default": "zero_value"
+          }
+        }
+      }
+    };
+};
+
+struct FieldG {
+    Vector<StringNE> typeParams;
+    Ident name;
+    GenericTypeExpr fieldType
+    // = {
+    //   "primitive": {
+    //     "string_field": {
+    //       "required": {
+    //         "validation": null,
+    //         "default": "zero_value"
+    //       }
+    //     }
+    //   }
+    // }
+    ;
+};
+
+// union Multiplicity {
+//   Void required;
+//   Void optional;
+//   Nullable<VectorValidator> multiple;
+// };
+
+union UITypeExpr {
+    Primitive primitive;
+    // TODO can these, the `Json`, be more typesafe?
+    ValueTDV<Vector<Field>,Json,NotImplementedValidation> record;
+    @FormLabel "One Of (enum)"
+    ValueT<Vector<Field>> oneOf;
+    Value unit_field;
+    // ValueT<Expression> dynamicEnum;
+    ValueT<ScopedName> namedFragment;
+    // ForeignKey foreignKey; // this could be a primitive or an expression
+    // ValueT<Expression> expression;
+};
+
+union GenericTypeExpr {
+    StringNE typeParam;
+    ValueTDVG<Vector<FieldG>,Json,NotImplementedValidation> record;
+    @FormLabel "One Of (enum)"
+    ValueTG<Vector<FieldG>> oneOf;
+    Primitive primitive;
+    Value unit_field;
+    // ValueT<Expression> dynamicEnum;
+    ValueT<ScopedName> namedFragment;
+    // ForeignKey foreignKey; // this could be a primitive or an expression
+    // ValueT<Expression> expression;
+};
+
+struct ScopedName {
+    ModuleName moduleName;
+    Ident name;
+};
+
+union StringValidation {
+  ValidValues list;
+  ValidRegex  regex;
+};
+
+union NotImplementedValidation {
+  Void notImplemented;
+};
+
+union Primitive {
+    ValueDV<String,StringValidation> string_field;
+    ValueDV<String,StringValidation> password_field;
+    ValueDV<String,StringValidation> markdown_field;
+    ValueDV<String,StringValidation> email_field;
+    ValueDV<String,StringValidation> alphanumeric_field;
+    ValueDV<String,StringValidation> multiline_field;
+    ValueDV<String,StringValidation> not_empty_field;
+    // Value unit_field;
+    ValueD<Bool> bool_field;
+    ValueTDV<NumberPrimitive,Int64,NotImplementedValidation> signed_number_field;
+    ValueTDV<NumberPrimitive,Word64,NotImplementedValidation> unsigned_number_field;
+    ValueDV<Double,NotImplementedValidation> double_number_field;
+    ValueDV<Json,NotImplementedValidation> json_field;
+    // ValueTDV<ByteVector> byte_vector_field;
+    ValueTDV<UITypeExpr,Json,NotImplementedValidation> string_map_field;
+
+    ValueDV<common.time.Instant,NotImplementedValidation> instant;
+    ValueDV<common.time.LocalDate,NotImplementedValidation> localDate;
+    ValueDV<common.time.LocalTime,NotImplementedValidation> localTime;
+    ValueDV<common.time.LocalDateTime,NotImplementedValidation> localDateTime;
+    ValueDV<common.time.DayOfWeek,NotImplementedValidation> dayOfWeek;
+    ValueDV<common.time.Duration,NotImplementedValidation> duration;
+    ValueDV<common.time.Timezone,NotImplementedValidation> timezone;
+    // ValueTDV<common.GeographyGeoJson> geographyGeoJson;
+    // ValueTDV<common.GeometryWKT> geometryWKT;
+    // ValueDV<common.BigDecimal,NotImplementedValidation> bigDecimal;
+};
+
+/// Generic Value with (Type) Details, Default and Validation
+// T is the details of the value, eg size of a number, fields or a record
+// D is the type for the default value
+// V is the type of the validator
+union ValueTDVG<T,D,V> {
+  SingleValueTDVG<T,D,V> required;
+  SingleValueTDVG<T,D,V> optional;
+  MultipleValueTDVG<T,D,V> multiple;
+};
+struct SingleValueTDVG<T,D,V> {
+  Vector<StringNE> typeParams;
+  T details;
+  Nullable<V> validation = null;
+  Nullable<SingleDefault<D>> default = "zero_value";
+};
+struct MultipleValueTDVG<T,D,V> {
+  Vector<StringNE> typeParams;
+  T details;
+  Nullable<V> itemValidation = null;
+  Nullable<VectorValidator> vectorValidation = null;
+  Nullable<MultipleDefault<D>> default = "empty_array";
+};
+
+
+
+/// Value with (Type) Details, Default and Validation
+// T is the details of the value, eg size of a number, fields or a record
+// D is the type for the default value
+// V is the type of the validator
+union ValueTDV<T,D,V> {
+  SingleValueTDV<T,D,V> required;
+  SingleValueTDV<T,D,V> optional;
+  MultipleValueTDV<T,D,V> multiple;
+};
+struct SingleValueTDV<T,D,V> {
+  T details;
+  Nullable<V> validation = null;
+  Nullable<SingleDefault<D>> default = "zero_value";
+};
+struct MultipleValueTDV<T,D,V> {
+  T details;
+  Nullable<V> itemValidation = null;
+  Nullable<VectorValidator> vectorValidation = null;
+  Nullable<MultipleDefault<D>> default = "empty_array";
+};
+
+/// Value with Default and Validation
+// D is the type for the default value
+// V is the type of the validator
+union ValueDV<D,V> {
+  SingleValueDV<D,V> required;
+  SingleValueDV<D,V> optional;
+  MultipleValueDV<D,V> multiple;
+};
+struct SingleValueDV<D,V> {
+  Nullable<V> validation = null;
+  Nullable<SingleDefault<D>> default = "zero_value";
+};
+struct MultipleValueDV<D,V> {
+  Nullable<V> itemValidation = null;
+  Nullable<VectorValidator> vectorValidation = null;
+  Nullable<MultipleDefault<D>> default = "empty_array";
+};
+
+/// Generic Value with (Type) Details
+// T is the details of the value, eg size of a number, fields or a record
+union ValueTG<T> {
+  SingleValueTG<T> required;
+  SingleValueTG<T> optional;
+  MultipleValueTG<T> multiple;
+};
+struct SingleValueTG<T> {
+  Vector<StringNE> typeParams;
+  T details;
+};
+struct MultipleValueTG<T> {
+  Vector<StringNE> typeParams;
+  T details;
+  Nullable<VectorValidator> vectorValidation = null;
+};
+
+/// Value with (Type) Details
+// T is the details of the value, eg size of a number, fields or a record
+union ValueT<T> {
+  SingleValueT<T> required;
+  SingleValueT<T> optional;
+  MultipleValueT<T> multiple;
+};
+struct SingleValueT<T> {
+  T details;
+};
+struct MultipleValueT<T> {
+  T details;
+  Nullable<VectorValidator> vectorValidation = null;
+};
+
+/// Value with Default
+// D is the type for the default value
+union ValueD<D> {
+  SingleValueD<D> required;
+  SingleValueD<D> optional;
+  MultipleValueD<D> multiple;
+};
+struct SingleValueD<D> {
+  Nullable<SingleDefault<D>> default = "zero_value";
+};
+struct MultipleValueD<D> {
+  Nullable<VectorValidator> vectorValidation = null;
+  Nullable<MultipleDefault<D>> default = "empty_array";
+};
+
+/// Value without (Type) Details, Default and Validation
+union Value {
+  Unit required;
+  Unit optional;
+  MultipleValue multiple;
+};
+struct MultipleValue {
+  Nullable<VectorValidator> vectorValidation = null;
+};
+
+struct Unit {};
+
+union VectorValidator {
+  Word32 min;
+  Word32 max;
+  Pair<Word32,Word32> minMax;
+};
+
+union SingleDefault<T> {
+  Void zero_value;
+  T default_value;
+};
+union MultipleDefault<T> {
+  Void empty_array;
+  Vector<T> default_value;
+};
+
+annotation Primitive::string_field            FormLabel "String(s)";
+annotation UITypeExpr::unit_field              FormLabel "Sentinel (aka void or unit)";
+annotation Primitive::bool_field              FormLabel "Boolean(s)";
+annotation Primitive::signed_number_field     FormLabel "Number(s) signed";
+annotation Primitive::unsigned_number_field   FormLabel "Number(s) unsigned";
+annotation Primitive::double_number_field     FormLabel "Float";
+annotation Primitive::json_field              FormLabel "Json";
+// annotation Primitive::byte_vector_field       FormLabel "ByteVector";
+annotation Primitive::string_map_field        FormLabel "StringMap";
+
+struct NumberPrimitive {
+  NumberSize size = "size64";
+};
+
+union NumberSize {
+  @FormLabel "Byte"
+  Void size8;
+  @FormLabel "Two bytes"
+  Void size16;
+  @FormLabel "32 bits"
+  Void size32;
+  @FormLabel "64 bits"
+  Void size64;
+};
+
+};

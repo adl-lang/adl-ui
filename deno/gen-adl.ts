@@ -9,6 +9,9 @@ async function main() {
 
   await genTypescript({
     adlModules: [
+      'dynadl.appstate',
+      'dynadl.ast',
+      'dynadl.types',
       'common.strings',
       'common.ui',
       'common.time',

@@ -1,0 +1,22 @@
+module dynadl.types {
+
+import common.ui.ValidRegex;
+import common.ui.ValidValues;
+
+/// An identity (ie valid variable name in most programming languages)
+/// note leading "_" not valid in ADL
+@ValidRegex {
+  "regex" : "^[A-Za-z][A-Za-z0-9_]*$", // leading "_" not valid in ADL
+  "description" : "valid programming identity",
+  "returnGroup" : 0
+}
+type Ident = String;
+
+@ValidRegex {
+  "regex" : "^[A-Za-z][A-Za-z0-9_]*([.][A-Za-z][A-Za-z0-9_]*)*$", // leading "_" not valid in ADL
+  "description" : "valid package name (path)",
+  "returnGroup" : 0
+}
+type ModuleName = String;
+
+};

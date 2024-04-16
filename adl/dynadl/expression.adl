@@ -1,0 +1,96 @@
+module dynadl.expression {
+
+import sys.types.Pair;
+
+import dynadl.types.Ident;
+import dynadl.types.ModuleName;
+
+union Expression {
+    Value atom;
+    Reference reference;
+    Function function;
+    Vector<Expression> group;
+    BinaryExpresion binaryExpression;
+    UnaryExpression unaryExpression;
+};
+
+union Value {
+    // Void unit_field;
+    String string_field;
+    Bool bool_field;
+    Int64 signed_number_field;
+    Word64 unsigned_number_field;
+    Double double_number_field;
+    Json json_field;
+    // ByteVector byte_vector_field;
+    // StringMap string_map_field;
+    //
+    Vector<String> string_list;
+    Vector<Bool> bool_list;
+    Vector<Int64> signed_number_list;
+    Vector<Word64> unsigned_number_list;
+    Vector<Double> double_number_list;
+    // Vector<Json> json_list;
+    // Vector<ByteVector> byte_vector_list;
+    // Vector<StringMap> string_map_list;
+    //
+    Vector<Value> value_list;
+    //
+    common.Instant instant;
+    common.LocalDate localDate;
+    common.LocalTime localTime;
+    common.LocalDateTime localDateTime;
+    common.DayOfWeek dayOfWeek;
+    common.Duration duration;
+    common.Timezone timezone;
+    // common.GeographyGeoJson geographyGeoJson;
+    // common.GeometryWKT geometryWKT;
+    common.BigDecimal bigDecimal;
+};
+
+union Reference {
+  Vector<Ident> local_field;
+  Pair<Ident,Vector<Ident>> foreign_field;
+  Pair<Reference,AtticusSubject> atticus_ref;
+};
+struct AtticusSubject {
+  Reference ref;
+  Nullable<Predicate> predicate = null;
+};
+struct Predicate {
+  CompareOperator op;
+  Expression other;
+};
+union CompareOperator {
+    Void equals;
+    Void notEquals;
+    Void gt;
+    Void lt;
+    Void gte;
+    Void lte;
+    Void in_;
+};
+struct Function { String name; Vector<Expression> arguments; };
+struct BinaryExpresion { BinaryOperator operator; Expression left; Expression right; };
+struct UnaryExpression { UnaryOperator operator; Expression value; };
+union BinaryOperator {
+    Void plus;
+    Void minus;
+    Void multiply;
+    Void divide;
+    Void equals;
+    Void notEquals;
+    Void gt;
+    Void lt;
+    Void gte;
+    Void lte;
+    // at runtime both arguments must evaluate to strings
+    Void concatenate;
+};
+union UnaryOperator {
+    Void plus;
+    Void minus;
+    Void percentage;
+};
+
+};

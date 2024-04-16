@@ -1,0 +1,45 @@
+module dynadl.appview {
+
+import dynadl.types.*;
+
+import common.ui.FormLabel;
+import common.ui.FormGroups;
+import common.ui.FormGroupKey;
+
+struct Dictionary {
+    Ident name;
+    ModuleName moduleName;
+    Vector<Field> fields;
+};
+
+type Fields = Vector<Field>;
+
+struct Field {
+    Ident name;
+    Nullable<FormLabel> label;
+    Arity arity;
+    @FormLabel "Type"
+    UIType type_;
+    String details;
+    dynadl.ast.Field field;
+};
+
+union Arity {
+    Void optional;
+    Void required;
+    Void multiple;
+    Void dynamic;
+};
+
+union UIType {
+    Void primitive;
+    Void record;
+    Void oneOf;
+    Void unit_field;
+    Void namedFragment;
+    Void dynamicEnum;
+    // Void foreignKey;
+    Void expression;
+};
+
+};
