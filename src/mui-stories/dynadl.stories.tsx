@@ -48,10 +48,10 @@ export const Dictionary = () => {
       let decls: Record<string, AST.Decl> = {};
       const module = appSchema["dynamic"];
       if (module) {
-        decls = module.decls;
+        decls = { ...module.decls };
       }
       let version = 0;
-      newDecls.forEach((decl,i) => {
+      newDecls.forEach((decl, i) => {
         let version0 = 0;
         const declCurr = decls[decl.name];
         if (declCurr) {
@@ -59,13 +59,13 @@ export const Dictionary = () => {
             version0 = declCurr.version.value + 1;
           }
         }
-        if(i == 0 ) {
+        if (i == 0) {
           version = version0;
         }
         decl.version = { kind: "just", value: version0 };
         decls[decl.name] = decl;
       });
-    
+
       const module1 = AST.makeModule({
         name: "dynamic",
         imports: [],
@@ -73,16 +73,33 @@ export const Dictionary = () => {
         decls: decls
       });
       console.log("module1", module1, version);
-      appSchema["dynamic"] = module1;
 
       const te: adlrt.ATypeExpr<unknown> = { value: { typeRef: { kind: "reference", value: { moduleName: "dynamic", name: vv.value.name } }, parameters: [] } };
 
 
       setDynTypeExpr((dynadl) => {
-        // if( dynadl === undefined) {
-          return {te, version, value: undefined}
-        // }
-        // const jb = createJsonBinding(previewDeclResolver(), te)
+        if (dynadl === undefined) {
+          appSchema["dynamic"] = module1;
+          return { te, version, value: undefined };
+        }
+        const jb0 = createJsonBinding(previewDeclResolver(), dynadl.te);
+        try {
+          const jv0 = jb0.toJson(dynadl.value);
+          appSchema["dynamic"] = module1;
+          const jb1 = createJsonBinding(previewDeclResolver(), te);
+          try {
+            const value = jb1.fromJsonE(jv0);
+            return { te, version, value };
+          } catch (err) {
+            console.log("incompatible", err);
+            return { te, version, value: undefined };
+          }
+        } catch (err) {
+          // should happen, removed once "unimplemented veditor" is fixed
+          console.error(`shouldn't happen, removed once "unimplemented veditor" is fixed`, err);
+          appSchema["dynamic"] = module1;
+          return { te, version, value: undefined };
+        }
       });
     }
   }, [vv]);
@@ -102,7 +119,10 @@ export const Dictionary = () => {
         dynTypeExpr === undefined ? null :
           <RenderVEditorStory
             key={dynTypeExpr.version}
-            veditor={createVEditor(dynTypeExpr.te, previewDeclResolver(), new UiFactory())} />
+            veditor={createVEditor(dynTypeExpr.te, previewDeclResolver(), new UiFactory())}
+            initial={dynTypeExpr.value}
+            setValue={(value: unknown) => setDynTypeExpr(dte => ({ ...dte!, value }))}
+          />
       }
     </div>
   );
@@ -112,12 +132,21 @@ interface RenderVEditorStoryProps<T> {
   veditor: VEditor<T>,
   disabled?: boolean,
   initial?: T,
+  setValue: (val: T) => void,
 }
 function RenderVEditorStory<T>(props: RenderVEditorStoryProps<T>): JSX.Element {
   const { veditor, disabled, initial } = props;
   const [state, setState] = useState<unknown>(() => initial === undefined ? veditor.initialState : veditor.stateFromValue(initial));
   const vv = veditor.valueFromState(state);
   const rprops = { disabled: !!disabled };
+
+  useEffect(() => {
+    const v = veditor.valueFromState(state);
+    if (v.isValid) {
+      props.setValue(v.value);
+    }
+  }, [state]);
+
   const renderv = veditor.render(state, e => setState((s: unknown) => veditor.update(s, e)))(rprops);
   return (
     <div>
