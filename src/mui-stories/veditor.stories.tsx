@@ -129,8 +129,8 @@ export const VectorArticle = () => {
   
 export const VectorPerson = () => {
   const initial: adlex.Person[] = [
-    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
-    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    adlex.makePerson({name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}}),
+    adlex.makePerson({name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}}),
   ];
   const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
@@ -138,8 +138,8 @@ export const VectorPerson = () => {
 
 export const MaybeVectorPerson = () => {
   const initial: adlsys.Maybe<adlex.Person[]> = { kind: "just", value: [
-    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
-    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    adlex.makePerson({name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}}),
+    adlex.makePerson({name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}}),
   ]};
   const veditor = createVEditor(adlsys.texprMaybe(adlrt.texprVector(adlex.texprPerson())), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
@@ -151,8 +151,8 @@ export const VectorPersonCustomized = () => {
   const factory = new UiFactory();
   factory.addCustomVEditor(customizedPersonVector(factory)); 
   const initial: adlex.Person[] = [
-    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
-    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    adlex.makePerson({name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}}),
+    adlex.makePerson({name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}}),
   ];
   const veditor = createVEditor(texpr, RESOLVER, factory);
   return renderVEditorStory(veditor, false, initial);
