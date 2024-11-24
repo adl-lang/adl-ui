@@ -2,7 +2,6 @@ import { useState } from 'react'
 import * as adlrt  from "@/adl-gen/runtime/adl";
 import * as adlsys from "@/adl-gen/sys/types";
 
-
 import {RESOLVER} from "@/adl-gen/resolver";
 import {createVEditor, genericVectorVEditor, CustomContext, Factory, VEditorCustomize } from "../model/veditor/adlfactory";
 import {Column, cellContent} from "../model/adl-table";
@@ -101,8 +100,8 @@ export const NullablePerson = () => {
   
 export const VectorName = () => {
   const initial: adlex.Name[] = [
-    {first:"Bart", last:"Simpson"},
-    {first:"Lisa", last:"Simpson"},
+    adlex.makeName({ first: "Bart", last: "Simpson" }),
+    adlex.makeName({ first: "Lisa", last: "Simpson" }),
   ];
   const veditor = createVEditor(adlrt.texprVector(adlex.texprName()), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
@@ -129,8 +128,9 @@ export const VectorArticle = () => {
   
 export const VectorPerson = () => {
   const initial: adlex.Person[] = [
-    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
-    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: { kind: 'male' }, nickname: "" }),
+    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: { kind: 'male' } }),
+    adlex.makePerson({ name: adlex.makeName({ first: "Lisa", last: "Simpson" }), age: 14, role: 'boss', gender: { kind: 'female' } }),
   ];
   const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
@@ -138,8 +138,8 @@ export const VectorPerson = () => {
 
 export const MaybeVectorPerson = () => {
   const initial: adlsys.Maybe<adlex.Person[]> = { kind: "just", value: [
-    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
-    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    adlex.makePerson({name: adlex.makeName({first:"Bart", last:"Simpson"}), age: 12, role: 'underlying', gender: {kind:'male'}}),
+    adlex.makePerson({name: adlex.makeName({first:"Lisa", last:"Simpson"}), age: 14, role: 'boss', gender: {kind:'female'}}),
   ]};
   const veditor = createVEditor(adlsys.texprMaybe(adlrt.texprVector(adlex.texprPerson())), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
@@ -151,8 +151,8 @@ export const VectorPersonCustomized = () => {
   const factory = new UiFactory();
   factory.addCustomVEditor(customizedPersonVector(factory)); 
   const initial: adlex.Person[] = [
-    {name:{first:"Bart", last:"Simpson"}, age: 12, role: 'underlying', gender: {kind:'male'}},
-    {name:{first:"Lisa", last:"Simpson"}, age: 14, role: 'boss', gender: {kind:'female'}},
+    adlex.makePerson({name: adlex.makeName({first:"Bart", last:"Simpson"}), age: 12, role: 'underlying', gender: {kind:'male'}}),
+    adlex.makePerson({name: adlex.makeName({first:"Lisa", last:"Simpson"}), age: 14, role: 'boss', gender: {kind:'female'}}),
   ];
   const veditor = createVEditor(texpr, RESOLVER, factory);
   return renderVEditorStory(veditor, false, initial);
