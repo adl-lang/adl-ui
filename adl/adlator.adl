@@ -1,0 +1,56 @@
+module adlator {
+
+
+
+newtype Step0 = Json;
+
+struct Step1 {
+  Json value;
+};
+
+
+struct Step2 {
+  Json name;
+  Word8 age;
+  Json gender;
+  String role;
+};
+
+struct Step3 {
+  Name name;
+  Word8 age;
+  Json gender;
+  String role;
+};
+
+struct Step4 {
+  Name name;
+  Word8 age;
+  Gender1 gender;
+  String role;
+};
+
+struct Person {
+  Name name;
+  Word8 age;
+  Gender gender;
+  String role;
+};
+
+struct Name {
+  String first;
+  String last;
+};
+
+union Gender {
+  Void female;
+  Void male;
+  String other;
+};
+
+union Gender1 {
+  Void female;
+  Void male;
+};
+
+};

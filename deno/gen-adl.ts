@@ -15,6 +15,7 @@ async function main() {
       'sys.types',
       'sys.adlast',
       'examples',
+      'adlator',
     ],
     searchPath: [
       adlDir
