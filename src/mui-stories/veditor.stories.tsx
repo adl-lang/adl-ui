@@ -128,9 +128,9 @@ export const VectorArticle = () => {
   
 export const VectorPerson = () => {
   const initial: adlex.Person[] = [
-    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: { kind: 'male' }, nickname: "" }),
-    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: { kind: 'male' } }),
-    adlex.makePerson({ name: adlex.makeName({ first: "Lisa", last: "Simpson" }), age: 14, role: 'boss', gender: { kind: 'female' } }),
+    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: adlex.makeGender('male', null) }),
+    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: adlex.makeGender('male', null) }),
+    adlex.makePerson({ name: adlex.makeName({ first: "Lisa", last: "Simpson" }), age: 14, role: 'boss', gender: adlex.makeGender('female', null) }),
   ];
   const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
@@ -138,8 +138,8 @@ export const VectorPerson = () => {
 
 export const MaybeVectorPerson = () => {
   const initial: adlsys.Maybe<adlex.Person[]> = { kind: "just", value: [
-    adlex.makePerson({name: adlex.makeName({first:"Bart", last:"Simpson"}), age: 12, role: 'underlying', gender: {kind:'male'}}),
-    adlex.makePerson({name: adlex.makeName({first:"Lisa", last:"Simpson"}), age: 14, role: 'boss', gender: {kind:'female'}}),
+    adlex.makePerson({ name: adlex.makeName({ first: "Bart", last: "Simpson" }), age: 12, role: 'underlying', gender: adlex.makeGender('male', null) }),
+    adlex.makePerson({ name: adlex.makeName({ first: "Lisa", last: "Simpson" }), age: 14, role: 'boss', gender: adlex.makeGender('female', null) }),
   ]};
   const veditor = createVEditor(adlsys.texprMaybe(adlrt.texprVector(adlex.texprPerson())), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor, false, initial);
