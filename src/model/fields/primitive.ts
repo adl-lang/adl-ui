@@ -56,24 +56,30 @@ export function regexStringFieldFns(regex: string, description: string, returnGr
 // A string field that can't be empty
 
 export const NON_EMPTY_STRING_FIELD: FieldFns<string> = regexStringFieldFns("^.+$", "non-empty", 0);
+export const NON_EMPTY_MULTILINE_STRING_FIELD: FieldFns<string> = regexStringFieldFns("^[^]+$", "non-empty", 0);
 
 // A bounded integer field
 
 export function intFieldFns(minValue: number | null, maxValue: number | null): FieldFns<number> {
+  const re = new RegExp('^\\s*[+-]?\\d+\\s*$');
   return {
     toText(v) {
       return "" + v;
     },
     validate(text) {
-      const v = parseInt(text, 10);
-      if (isNaN(v)) {
-        return "must be an integer";
-      } else if (minValue !== null && v < minValue) {
-        return "value too small";
-      } else if (maxValue !== null && v > maxValue) {
-        return "value too large";
+      if (text.match(re)) {
+        const v = parseInt(text, 10);
+        if (isNaN(v)) {
+          return "must be an integer";
+        } else if (minValue !== null && v < minValue) {
+          return "value too small";
+        } else if (maxValue !== null && v > maxValue) {
+          return "value too large";
+        } else {
+          return null;
+        }
       } else {
-        return null;
+        return "must be an integer";
       }
     },
     fromText(text) {
@@ -97,9 +103,9 @@ export function numberFieldFns(minValue: number | null, maxValue: number | null)
       if (text.match(re)) {
         const v = parseFloat(text);
         if (!isNaN(v)) {
-          if (typeof(minValue) === 'number' && v < minValue) {
+          if (typeof (minValue) === 'number' && v < minValue) {
             return `value too small (min ${minValue})`;
-          } else if (typeof(maxValue) === 'number' && v > maxValue) {
+          } else if (typeof (maxValue) === 'number' && v > maxValue) {
             return `value too big (max ${maxValue})`;
           } else {
             return null;
@@ -122,8 +128,8 @@ export const NUMBER_FIELD: FieldFns<number> = numberFieldFns(null, null);
 
 // A BigDecimal field, which is stored as a string
 // but must be validated as a number
-export function bigDecimalFieldFns() : FieldFns<string> {
-  return regexStringFieldFns( '^\\s*(-?(?:\\d+(?:\\.\\d+)?|\\.\\d+))\\s*$', "a decimal value",1);
+export function bigDecimalFieldFns(): FieldFns<string> {
+  return regexStringFieldFns('^\\s*(-?(?:\\d+(?:\\.\\d+)?|\\.\\d+))\\s*$', "a decimal value", 1);
 }
 
 export const BIG_DECIMAL_STRING_FIELD: FieldFns<string> = bigDecimalFieldFns();
@@ -199,7 +205,7 @@ export function labelledValuesFieldFns<T>(
   equals: (v1: T, v2: T) => boolean,
   mappings: Mapping<T>[]
 ): FieldFns<T> {
-  const labelmap : {[key: string]: T} = {};
+  const labelmap: { [key: string]: T } = {};
   mappings.forEach(m => {
     labelmap[m.label] = m.value;
   });

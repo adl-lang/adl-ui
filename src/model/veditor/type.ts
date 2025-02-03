@@ -24,7 +24,12 @@ export interface IVEditor<T, S, E, R> {
 }
 
 export type  Validated<T>
-  = {isValid: false, errors: string[]}
+  = {
+    isValid: false,
+    errors: string[],
+    // TODO
+    // partialVal: Partial<T>
+  }
   | {isValid: true, value: T}
   ;
 

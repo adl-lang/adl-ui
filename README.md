@@ -1,52 +1,39 @@
-# adl-ui
+# Material UI - Vite.js in TypeScript example
 
-A toolkit for generating user interface components from ADL type definitions.
+## How to use
 
-## code structure
+Download the example [or clone the repo](https://github.com/mui/material-ui):
 
-* `model/` - the underlying state and events for adl derived UI elements
-* `ui/` - a view implementation in terms of raw styled components
-* `mui/` - a view implementation in terms of the material ui framework
-* `*-stories/` - storybook stories for each of the above
+<!-- #default-branch-switch -->
 
-in any given application either model+ui or model+mui should be used
-
-## dev usage
-
-Install tools locally, and make them available in the curent shell (yarn, node, deno, and adl tools):
-
-```
-source deno/local-setup.sh
+```bash
+curl https://codeload.github.com/mui/material-ui/tar.gz/master | tar -xz --strip=2 material-ui-master/examples/material-ui-vite-ts
+cd material-ui-vite-ts
 ```
 
-Install node packages and generate code from adl:
+Install it and run:
 
-```
-yarn
-```
-
-Run the storybook and open in the default browser:
-
-```
-yarn storybook
+```bash
+npm install
+npm run dev
 ```
 
-If you change the adl (`adl/**.adl`) and want to regenerate the typescript code, just rerun `yarn`.
+or:
 
-## reuse in another project
+<!-- #default-branch-switch -->
 
-1) copy `src/model` and either `src/mui` or `src/ui` to a folder in your target project.
+[![Edit on StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/mui/material-ui/tree/master/examples/material-ui-vite-ts)
 
-2) Ensure that your target project has adl generated typescript code to satisfy the following imports:
+[![Edit on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/github/mui/material-ui/tree/master/examples/material-ui-vite-ts)
 
-```
-@/adl-gen/runtime
-@/adl-gen/sys/types
-@/adl-gen/sys/adlast
-@/adl-gen/common/ui
-```
-3) Update the target project's `package.json` to include either material-ui (if you used `src/mui`) or styled
-components (if you used `src/ui`
+## The idea behind the example
 
+This example uses [Vite.js](https://github.com/vitejs/vite).
+It includes `@mui/material` and its peer dependencies, including [Emotion](https://emotion.sh/docs/introduction), the default style engine in Material UI v5.
 
+## What's next?
 
+<!-- #default-branch-switch -->
+
+You now have a working example project.
+You can head back to the documentation and continue by browsing the [templates](https://mui.com/material-ui/getting-started/templates/) section.

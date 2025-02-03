@@ -7,22 +7,23 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../model/veditor/adlfactory";
 import {FieldFns} from "../model/fields/type";
-import { typeExprToStringUnscoped } from '@/adl-gen/runtime/utils';
+import { typeExprToStringUnscoped } from '@adllang/adl-runtime';
 import { Select } from "./select";
 import { Toggle } from "./toggle";
 import { CellContent } from '../model/adl-table';
-import { createAdlFormState } from './form';
+import { useAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
 import { GridRow, Rendered, RenderFn, RenderProps, VEditor } from './veditor';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import { styled } from "@mui/system";
+import { styled } from "@mui/material";
+import { hasDisabledAnnotation } from '../model/adl-annotations';
 
 export function fieldElement(element:JSX.Element): Rendered {
   return {
     element: () => {return element},
     gridElement: () => {return {beside:element}},
-  };    
+  };
 }
 
 export function wideFieldElement(element:JSX.Element): Rendered {
@@ -37,6 +38,18 @@ export class UiFactory implements Factory<RenderFn> {
    veditorCustomize: VEditorCustomize<RenderFn>[] = [];
    fieldCustomize: FieldCustomize[] = [];
   
+  constructor(
+    vc?: (f: UiFactory) => VEditorCustomize<RenderFn>,
+    fc? : (f: UiFactory) => FieldCustomize,
+  ) {
+    if (vc) {
+      this.veditorCustomize.push(vc(this));
+    }
+    if (fc) {
+      this.fieldCustomize.push(fc(this));
+    }
+  }
+
   renderVoidEditor(): RenderFn {
     return () => fieldElement(<div/>);
   }
@@ -63,8 +76,10 @@ export class UiFactory implements Factory<RenderFn> {
   renderStructEditor(props: StructEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
       const rows: GridRow[] = props.fields.map(fd => {
-        const label = rprops.disabled? fd.label : <b>{fd.label}</b>;
-        const rendered = fd.veditor.veditor.render(fd.veditor.state, fd.veditor.onUpdate)(rprops);
+        // disabled is field is annotated with ui.Disabled
+        const disabled = rprops.disabled ? rprops.disabled : hasDisabledAnnotation(fd.annotations)
+        const label = disabled ? fd.label : <b>{fd.label}</b>;
+        const rendered = fd.veditor.veditor.render(fd.veditor.state, fd.veditor.onUpdate)({disabled});
         const element = rendered.gridElement();
         return {kind:'labelled', label, element} as GridRow
       });
@@ -179,7 +194,7 @@ interface VectorItemFormProps<T> {
 }
 
 function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
-  const formState = createAdlFormState({
+  const formState = useAdlFormState({
     value0: props.value0,
     veditor: props.veditor,
   });

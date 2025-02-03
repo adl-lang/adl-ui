@@ -40,7 +40,7 @@ interface SelectProps {
 export function Select(props: SelectProps) {
   const state = props.state;
 
-  const current = state.current == null ? "???" : state.choices[state.current];
+  const current = state.current == null ? "???" : state.choices[state.current] ? state.choices[state.current] : "???";
   
   const NO_CHOICE = "???";
   const labels = [

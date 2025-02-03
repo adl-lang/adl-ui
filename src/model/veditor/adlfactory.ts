@@ -1,12 +1,12 @@
-import * as adlrt  from "@/adl-gen/runtime/adl";
-import * as adlast from "@/adl-gen/sys/adlast";
-import * as systypes from "@/adl-gen/sys/types";
+import * as adlrt  from "@adllang/adl-runtime";
+import * as adlast from "@adl-gen/sys/adlast";
+import * as systypes from "@adl-gen/sys/types";
 import * as adltree from "../adl-tree";
-import { createJsonBinding } from '@/adl-gen/runtime/json';
+import { createJsonBinding } from '@adllang/adl-runtime';
 
 import {IVEditor, OVEditor, UpdateFn, Validated, invalid, mapValidated, valid} from "./type";
 import {FieldFns} from "../fields/type";
-import {scopedNamesEqual} from "@/adl-gen/runtime/utils";
+import {scopedNamesEqual} from "@adllang/adl-runtime";
 import { adlPrimitiveFieldFns, maybeField, nullableField } from "../fields/adl";
 import { SelectState } from "../select";
 import { getAdlTableInfo, Column, cellContent } from "../adl-table";
@@ -66,6 +66,7 @@ export interface StructEditorProps<R> {
 export interface StructFieldProps<R> {
   name: string;
   label: string;
+  annotations: adlast.Annotations;
   veditor: VEditorProps<unknown,unknown, unknown,R>
 }
 
@@ -224,8 +225,15 @@ function createVEditor0<R>(
         }
       }
 
-      // FIXME: solve this for non-struct types.
-      return unimplementedVEditor(factory, adlTree.typeExpr);
+      // Default to a single column table, showing the value as a string
+      let columns: Column<string, string>[] = [
+         {
+            header: cellContent("value"),
+            id: "kind",
+            content: v => cellContent(v.toString()),
+         },
+      ];
+      return genericVectorVEditor(factory, columns, valueVEditor);
     }
 
     case "stringmap":
@@ -308,12 +316,17 @@ function structVEditor<R>(
   struct: adltree.Struct,
 ): IVEditor<unknown, StructState, StructEvent,R> {
   const fieldDetails = struct.fields.map(field => {
-    const veditor = createVEditor0(declResolver, nullContext,  field.adlTree, factory);
+    const ctx: InternalContext = {
+      scopedDecl: null,
+      field: field.astField,
+    }
+    const veditor = createVEditor0(declResolver, ctx,  field.adlTree, factory);
     const jsonBinding = createJsonBinding<unknown>(declResolver, { value: field.adlTree.typeExpr });
-
-    const label = getFormLabelFromAnnotation(declResolver, field.astField) || fieldLabel(field.astField.name);
+    let label = getFormLabelFromAnnotation(declResolver, field.astField)
+    label = label !== null ? label : field.astField.name
     return {
       name: field.astField.name,
+      annotations: field.astField.annotations,
       default: field.astField.default,
       jsonBinding,
       label,
@@ -348,7 +361,12 @@ function structVEditor<R>(
       fieldStates: {},
     };
     for (const fd of fieldDetails) {
-      state.fieldStates[fd.name] = fd.veditor.stateFromValue(value[fd.name]);
+      // handles partial values
+      if (value[fd.name]) {
+        state.fieldStates[fd.name] = fd.veditor.stateFromValue(value[fd.name]);
+      } else {
+        state.fieldStates[fd.name] = fd.veditor.stateFromValue(fd.veditor.initialState);
+      }
     }
     return state;
   }

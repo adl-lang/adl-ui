@@ -1,8 +1,8 @@
-import  { useState } from "react";
-import { isJsonParseException, JsonBinding } from '@/adl-gen/runtime/json';
+import { isJsonParseException, JsonBinding } from '@adllang/adl-runtime';
+import { Button, styled, TextField } from "@mui/material";
+import { useState } from "react";
 import { Toggle } from "./toggle";
 import { VEditor } from "./veditor";
-import { Button, styled, TextField } from "@mui/material";
 
 // A form for entry of an arbirary ADL value . It is provided with an initial value and its
 // ADL type. The onApply() callback is made when the user presses the apply button on validated
@@ -15,6 +15,7 @@ export interface AdlFormProps<T> {
   onApply?(value: T): void;
   disabled?: boolean;
   validate?(value: T): Promise<string | undefined>;
+  partial?(value: Partial<T>): Promise<void>;
 }
 
 export interface AdlFormState<T> {
@@ -59,7 +60,7 @@ interface FormValidated {
 type FormValidation = AwaitingValidation | FormError | FormValidated;
 
 
-export function createAdlFormState<T>(params: {
+export function useAdlFormState<T>(params: {
     value0?: T, 
     veditor: VEditor<T>, 
     jsonBinding?: JsonBinding<T>,
@@ -189,6 +190,10 @@ export const AdlForm = (props: AdlFormProps<unknown>) => {
   const validateForm = async (adlState: unknown) => {
     const vv = state.veditor.valueFromState(adlState);
 
+    // // TODO
+    // if (!vv.isValid && props.partial && state.mode === Mode.VE) {
+    //   props.partial(vv.partialVal);
+    // }
     if (vv.isValid && props.validate && state.mode === Mode.VE) {
       const validationSeq = state.formValidation.validationSeq + 1;
       state.setFormValidation({
