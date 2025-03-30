@@ -11,7 +11,7 @@ import { typeExprToStringUnscoped } from '@/adl-gen/runtime/utils';
 import { Select } from "./select";
 import { Toggle } from "./toggle";
 import { CellContent } from '../model/adl-table';
-import { createAdlFormState } from './form';
+import { useAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
 import { GridRow, Rendered, RenderFn, RenderProps, VEditor } from './veditor';
@@ -180,7 +180,7 @@ interface VectorItemFormProps<T> {
 }
 
 function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
-  const formState = createAdlFormState({
+  const formState = useAdlFormState({
     value0: props.value0,
     veditor: props.veditor,
   });

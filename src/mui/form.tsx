@@ -59,7 +59,7 @@ interface FormValidated {
 type FormValidation = AwaitingValidation | FormError | FormValidated;
 
 
-export function createAdlFormState<T>(params: {
+export function useAdlFormState<T>(params: {
     value0?: T, 
     veditor: VEditor<T>, 
     jsonBinding?: JsonBinding<T>,

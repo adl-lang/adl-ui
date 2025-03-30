@@ -5,7 +5,7 @@ import * as adlex from '@/adl-gen/examples';
 import * as adlrt  from "@/adl-gen/runtime/adl";
 
 import { UiFactory } from "../mui/factory";
-import { AdlFormState, createAdlFormState } from '../mui/form';
+import { AdlFormState, useAdlFormState } from '../mui/form';
 import { AdlForm } from '../mui/form';
 import { createJsonBinding } from '@/adl-gen/runtime/json';
 import { customizedHierarchyVector, customizedPersonVector } from './veditor.stories';
@@ -16,7 +16,7 @@ export default {
 
 export const PersonEmpty = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
-  const state = createAdlFormState({
+  const state = useAdlFormState({
     veditor
   })
   return renderFormStory(state, false);
@@ -24,7 +24,7 @@ export const PersonEmpty = () => {
 
 export const PersonInitialized = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
-  const state = createAdlFormState({
+  const state = useAdlFormState({
     veditor,
     value0: {
       name: {first: "Mike", last: "Mechanic"},
@@ -39,7 +39,7 @@ export const PersonInitialized = () => {
 export const PersonWithRawMode = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
   const jsonBinding = createJsonBinding(RESOLVER, adlex.texprPerson());
-  const state = createAdlFormState({
+  const state = useAdlFormState({
     veditor,
     jsonBinding,
     value0: {
@@ -57,7 +57,7 @@ export const  VectorPerson = () => {
   const factory = new UiFactory();
   factory.addCustomVEditor(customizedPersonVector(factory)); 
   const veditor = createVEditor(adlrt.texprVector(adlex.texprPerson()), RESOLVER, factory);
-  const state = createAdlFormState({
+  const state = useAdlFormState({
     veditor
   })
   return renderFormStory(state, false);
@@ -68,7 +68,7 @@ export const Hierararchy = () => {
   factory.addCustomVEditor(customizedHierarchyVector(factory)); 
   const veditor = createVEditor(adlex.texprHierarchy(), RESOLVER, factory);
   const jsonBinding = createJsonBinding(RESOLVER, adlex.texprHierarchy());
-  const state = createAdlFormState({
+  const state = useAdlFormState({
     veditor,
     jsonBinding,
     value0: {
