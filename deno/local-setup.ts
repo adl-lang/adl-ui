@@ -5,7 +5,7 @@ import {
   installTo
 } from "https://deno.land/x/adllang_localsetup@v0.6/mod.ts";
 
-const DENO = packages.deno("1.34.1");
+const DENO = packages.deno("2.5.6");
 const ADL = packages.adl("1.1.12");
 const NODE = packages.nodejs("16.13.0");
 const YARN = packages.yarn("1.22.15");
