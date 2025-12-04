@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "prepare": "deno task gen-adl",
-    "test": "yarn vitest",
+    "test": "pnpm vitest",
     "build": "tsc",
     "storybook": "start-storybook -p 6006"
   },

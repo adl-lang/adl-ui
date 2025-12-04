@@ -2,5 +2,11 @@
   "lock": "./deno/deno.lock",
   "tasks" : {
     "gen-adl" : "deno run --quiet --unstable --allow-all deno/gen-adl.ts"
+  },
+  "imports" : {
+    "@adllang/adl-runtime": "jsr:@adllang/adl-runtime@^0.1.0",
+    "@adllang/adlc-tools": "jsr:@adllang/adlc-tools@^0.2.2",
+    "@std/path": "jsr:@std/path@^1.0.8",
   }
+  
 }

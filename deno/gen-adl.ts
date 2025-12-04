@@ -1,6 +1,6 @@
 import {
-  genTypescript
-} from "https://deno.land/x/adllang_tsdeno@v0.2/mod.ts";
+  genTypescript,
+} from "@adllang/adlc-tools";
 
 async function main() {
   const adlDir = './adl';
