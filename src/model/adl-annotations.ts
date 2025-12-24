@@ -1,5 +1,5 @@
 // Helper functions to extract various ADL annotations
-import { DeclResolver } from "@/adl-gen/runtime/adl";
+import { ATypeExpr, DeclResolver } from "@/adl-gen/runtime/adl";
 import * as ui from "@/adl-gen/common/ui";
 import { createJsonBinding, JsonBinding } from "@/adl-gen/runtime/json";
 import { typeExprsEqual } from "@/adl-gen/runtime/utils";
@@ -62,5 +62,13 @@ export function getValidValuesAnnotation(
   annotations: adlast.Annotations
 ): ui.ValidValues | null {
   const jb = createJsonBinding(dresolver, ui.texprValidValues());
+  return getAnnotation(annotations, jb);
+}
+
+export function getValidDoubleRangeAnnotations(
+  dresolver: DeclResolver,
+  annotations: adlast.Annotations
+): ui.ValidDoubleRange | null {
+  const jb = createJsonBinding(dresolver, ui.texprValidDoubleRange());
   return getAnnotation(annotations, jb);
 }

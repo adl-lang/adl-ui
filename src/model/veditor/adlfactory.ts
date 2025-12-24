@@ -814,7 +814,7 @@ function createField1<R>(
   }
   const details = adlTree.details();
   if (details.kind === "primitive") {
-    const fieldfns = adlPrimitiveFieldFns(details.ptype);
+    const fieldfns = adlPrimitiveFieldFns(ctx.declResolver, details.ptype, details.parentAnnotations);
     if (fieldfns !== null) {
       return fieldfns;
     }

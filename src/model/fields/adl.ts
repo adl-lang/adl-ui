@@ -5,6 +5,7 @@ import * as systypes from "@/adl-gen/sys/types";
 import * as adlrt  from "@/adl-gen/runtime/adl";
 import * as adlast from "@/adl-gen/sys/adlast";
 import { createJsonBinding, jsonParseException } from "@/adl-gen/runtime/json";
+import { getValidDoubleRangeAnnotations } from "../adl-annotations";
 
 const _primitiveFieldFns: Record<string, FieldFns<unknown>> = {
   String: stringFieldFns,
@@ -22,7 +23,14 @@ const _primitiveFieldFns: Record<string, FieldFns<unknown>> = {
   Json: jsonFieldFns()
 };
 
-export function adlPrimitiveFieldFns(primitive: string): FieldFns<unknown> | null {
+export function adlPrimitiveFieldFns(resolver: adlrt.DeclResolver, primitive: string, annotations: adlast.Annotations): FieldFns<unknown> | null {
+  if (primitive === 'Double' || primitive === 'Float') {
+    const range = getValidDoubleRangeAnnotations(resolver, annotations);
+    if (range) {
+      return numberFieldFns(range.min, range.max);
+    }
+  }
+
   if (_primitiveFieldFns[primitive]) {
     return _primitiveFieldFns[primitive];
   } else {

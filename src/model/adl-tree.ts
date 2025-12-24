@@ -1,5 +1,6 @@
 import { DeclResolver } from "@/adl-gen/runtime/adl";
 import * as ast from "@/adl-gen/sys/adlast";
+import { Announcement } from "@mui/icons-material";
 
 // A fully resolved tree structure corresponding to an ADL type.
 //
@@ -11,7 +12,7 @@ export interface AdlTree {
   details: Lazy<AdlTreeDetails>;
 }
 
-export type AdlTreeDetails =
+export type AdlTreeKind =
   | Primitive
   | Vector
   | StringMap
@@ -20,6 +21,10 @@ export type AdlTreeDetails =
   | Union
   | NewType
   | TypeDef;
+
+export type AdlTreeDetails = AdlTreeKind & {
+  parentAnnotations: ast.Annotations
+}
 
 export interface Primitive {
   kind: "primitive";
@@ -83,30 +88,33 @@ interface TParamBindings {
 // Walk a type expression to build an AdlTree from an adl type expression.
 //
 export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver): AdlTree {
-  function mkTreeDetails(typeExpre: ast.TypeExpr, tParamBindings: TParamBindings): AdlTreeDetails {
+  function mkTreeDetails(typeExpre: ast.TypeExpr, tParamBindings: TParamBindings, parentAnnotations0: ast.Annotations): AdlTreeDetails {
     switch (typeExpre.typeRef.kind) {
       case "primitive":
         switch (typeExpre.typeRef.value) {
           case "Vector":
             return {
               kind: "vector",
-              param: mkTree(typeExpre.parameters[0], tParamBindings)
+              param: mkTree(typeExpre.parameters[0], tParamBindings, parentAnnotations0),
+              parentAnnotations: parentAnnotations0,
             };
           case "StringMap":
             return {
               kind: "stringmap",
-              param: mkTree(typeExpre.parameters[0], tParamBindings)
+              param: mkTree(typeExpre.parameters[0], tParamBindings, parentAnnotations0),
+              parentAnnotations: parentAnnotations0,
             };
           case "Nullable":
             return {
               kind: "nullable",
-              param: mkTree(typeExpre.parameters[0], tParamBindings)
+              param: mkTree(typeExpre.parameters[0], tParamBindings, parentAnnotations0),
+              parentAnnotations: parentAnnotations0,
             };
           default:
-            return { kind: "primitive", ptype: typeExpre.typeRef.value };
+            return { kind: "primitive", ptype: typeExpre.typeRef.value, parentAnnotations: parentAnnotations0 };
         }
       case "typeParam":
-        return mkTreeDetails(tParamBindings[typeExpre.typeRef.value], tParamBindings);
+        return mkTreeDetails(tParamBindings[typeExpre.typeRef.value], tParamBindings, parentAnnotations0);
       case "reference":
         const scopedDecl = declResolver(typeExpre.typeRef.value);
         switch (scopedDecl.decl.type_.kind) {
@@ -119,7 +127,8 @@ export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver
               fields: mkFields(
                 struct.fields,
                 mkTParamBindings(tParamBindings, struct.typeParams, typeExpre.parameters)
-              )
+              ),
+              parentAnnotations: [],
             };
           case "union_":
             const union = scopedDecl.decl.type_.value;
@@ -130,30 +139,42 @@ export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver
               fields: mkFields(
                 union.fields,
                 mkTParamBindings(tParamBindings, union.typeParams, typeExpre.parameters)
-              )
+              ),
+              parentAnnotations: [],
             };
           case "type_":
+          {
             const typedef = scopedDecl.decl.type_.value;
+            const parentAnnotations = [...scopedDecl.decl.annotations, ...parentAnnotations0]; 
+
             return {
               kind: "typedef",
               moduleName: scopedDecl.moduleName,
               astDecl: scopedDecl.decl,
               adlTree: mkTree(
                 typedef.typeExpr,
-                mkTParamBindings(tParamBindings, typedef.typeParams, typeExpre.parameters)
-              )
+                mkTParamBindings(tParamBindings, typedef.typeParams, typeExpre.parameters),
+                parentAnnotations
+              ),
+              parentAnnotations: [],
             };
+          }
           case "newtype_":
+          {
             const newtype = scopedDecl.decl.type_.value;
+            const parentAnnotations = [...scopedDecl.decl.annotations, ...parentAnnotations0]; 
             return {
               kind: "newtype",
               moduleName: scopedDecl.moduleName,
               astDecl: scopedDecl.decl,
               adlTree: mkTree(
                 newtype.typeExpr,
-                mkTParamBindings(tParamBindings, newtype.typeParams, typeExpre.parameters)
-              )
+                mkTParamBindings(tParamBindings, newtype.typeParams, typeExpre.parameters),
+                parentAnnotations
+              ),
+              parentAnnotations: [],
             };
+          }
           default:
             // tslint:disable-next-line: no-any
             return null as any; // Why is this required for typechecking?
@@ -164,10 +185,10 @@ export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver
     }
   }
 
-  function mkTree(typeExpre: ast.TypeExpr, tParamBindings: TParamBindings): AdlTree {
+  function mkTree(typeExpre: ast.TypeExpr, tParamBindings: TParamBindings, parentAnnotations: ast.Annotations): AdlTree {
     return {
       typeExpr: substituteTParams(typeExpre, tParamBindings),
-      details: once(() => mkTreeDetails(typeExpre, tParamBindings))
+      details: once(() => mkTreeDetails(typeExpre, tParamBindings, parentAnnotations))
     };
   }
 
@@ -178,10 +199,10 @@ export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver
     return typeExpre.typeRef.kind === "typeParam"
       ? tParamBindings[typeExpre.typeRef.value]
       : {
-          typeRef: typeExpre.typeRef,
-          // tslint:disable-next-line: no-any
-          parameters: typeExpre.parameters.map((p: any) => substituteTParams(p, tParamBindings))
-        };
+        typeRef: typeExpre.typeRef,
+        // tslint:disable-next-line: no-any
+        parameters: typeExpre.parameters.map((p: any) => substituteTParams(p, tParamBindings))
+      };
   }
 
   function mkTParamBindings(
@@ -190,7 +211,7 @@ export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver
     typeExprs: ast.TypeExpr[]
   ): TParamBindings {
     const sTypeExprs = typeExprs.map(t => substituteTParams(t, existing));
-    const newBindings: Record<string,ast.TypeExpr> = {};
+    const newBindings: Record<string, ast.TypeExpr> = {};
     Object.assign(newBindings, existing);
     idents.forEach((ident, i) => {
       newBindings[ident] = sTypeExprs[i];
@@ -201,11 +222,11 @@ export function createAdlTree(typeExpr: ast.TypeExpr, declResolver: DeclResolver
   function mkFields(fields: ast.Field[], tParamBindings: TParamBindings): Field[] {
     return fields.map(field => ({
       astField: field,
-      adlTree: mkTree(field.typeExpr, tParamBindings)
+      adlTree: mkTree(field.typeExpr, tParamBindings, field.annotations)
     }));
   }
 
-  return mkTree(typeExpr, {});
+  return mkTree(typeExpr, {}, []);
 }
 
 // Get the details of an ADL tree, resolving newtypes and typedefs if requested.

@@ -51,6 +51,11 @@ export const Person = () => {
   const veditor = createVEditor(adlex.texprPerson(), RESOLVER, new UiFactory());
   return renderVEditorStory(veditor);
 }
+
+export const SalaryEarner = () => {
+  const veditor = createVEditor(adlex.texprSalaryEarner(), RESOLVER, new UiFactory());
+  return renderVEditorStory(veditor);
+}
   
 export const Article = () => {
   const veditor = createVEditor(adlex.texprArticle(), RESOLVER, new UiFactory());

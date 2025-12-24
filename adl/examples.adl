@@ -1,5 +1,7 @@
 module examples {
 
+import common.ui.ValidDoubleRange;
+
 struct Name {
   String first;
   String last;
@@ -27,5 +29,19 @@ struct Hierarchy {
   Person leader;
   Vector<Hierarchy> underlings;
 };
+
+struct SalaryEarner {
+  String employeeId;
+
+  Income income = 0;
+
+  @ValidDoubleRange {"min": 0.10, "max": 0.48}
+  Double tax_rate = 0.22;
+    
+};
+
+
+@ValidDoubleRange { "min": 0, "max": 1000000 }
+newtype Income = Double;
 
 };

@@ -164,7 +164,7 @@ export function getFieldFns(
   } else if (fdetails.kind === "newtype") {
       return getFieldFns(declResolver, scopedDecl, field, fdetails.adlTree, customFields);
   } else if (fdetails.kind === "primitive") {
-    return adlPrimitiveFieldFns(fdetails.ptype);
+    return adlPrimitiveFieldFns(declResolver, fdetails.ptype, fdetails.parentAnnotations);
   } else if (fdetails.kind === "nullable") {
     const fieldfns = getFieldFns(declResolver, scopedDecl, field, fdetails.param, customFields);
     if (fieldfns === null) {
