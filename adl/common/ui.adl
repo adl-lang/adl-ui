@@ -48,6 +48,10 @@ struct ValidRegex {
   Int8 returnGroup = 0;
 };
 
+/// A field annotation for descriptive text assocated with
+/// that field
+type Description = String;
+
 /// An field/type alias annotation to constrain the
 /// values allowed to be within the specified range
 struct ValidDoubleRange {

@@ -21,7 +21,8 @@ export type WideGridRow = { kind: 'wide', element: JSX.Element};
 
 export interface LabelledGridRow {
   kind: 'labelled',
-  label: string,
+  label: string | JSX.Element,
+  description: string,
   element: RenderedGridItem;
 };
 

@@ -1,5 +1,6 @@
 module examples {
 
+import common.ui.Description;
 import common.ui.ValidDoubleRange;
 
 struct Name {
@@ -31,13 +32,13 @@ struct Hierarchy {
 };
 
 struct SalaryEarner {
+  @Description "The 15 character employee id, starting with E-"
   String employeeId;
-
   Income income = 0;
 
+  @Description "The net tax rate that will be paid (0.22 => 22%)"
   @ValidDoubleRange {"min": 0.10, "max": 0.48}
   Double tax_rate = 0.22;
-    
 };
 
 

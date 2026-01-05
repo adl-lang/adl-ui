@@ -5,8 +5,8 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import {Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../model/veditor/adlfactory";
-import {FieldFns} from "../model/fields/type";
+import { Factory, StructEditorProps, FieldEditorProps, UnionEditorProps, UnimplementedEditorProps, MaybeEditorProps, VectorEditorProps, CustomContext, VEditorCustomize, FieldCustomize, } from "../model/veditor/adlfactory";
+import { FieldFns } from "../model/fields/type";
 import { typeExprToStringUnscoped } from '@/adl-gen/runtime/utils';
 import { Select } from "./select";
 import { Toggle } from "./toggle";
@@ -15,59 +15,60 @@ import { useAdlFormState } from './form';
 import { AdlForm } from './form';
 import { Modal } from './modal';
 import { GridRow, Rendered, RenderFn, RenderProps, VEditor } from './veditor';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, tooltipClasses, TooltipProps } from '@mui/material';
 import { styled } from "@mui/system";
 import { Fragment } from 'react';
 
-export function fieldElement(element:JSX.Element): Rendered {
+export function fieldElement(element: JSX.Element): Rendered {
   return {
-    element: () => {return element},
-    gridElement: () => {return {beside:element}},
-  };    
+    element: () => { return element },
+    gridElement: () => { return { beside: element } },
+  };
 }
 
-export function wideFieldElement(element:JSX.Element): Rendered {
+export function wideFieldElement(element: JSX.Element): Rendered {
   return {
-    element: () => {return element},
-    gridElement: () => {return {below: [{kind:'wide', element}]}},
-  };    
+    element: () => { return element },
+    gridElement: () => { return { below: [{ kind: 'wide', element }] } },
+  };
 }
-  
- 
+
+
 export class UiFactory implements Factory<RenderFn> {
-   veditorCustomize: VEditorCustomize<RenderFn>[] = [];
-   fieldCustomize: FieldCustomize[] = [];
-  
+  veditorCustomize: VEditorCustomize<RenderFn>[] = [];
+  fieldCustomize: FieldCustomize[] = [];
+
   renderVoidEditor(): RenderFn {
-    return () => fieldElement(<div/>);
+    return () => fieldElement(<div />);
   }
-  
+
   renderFieldEditor(props: FieldEditorProps): RenderFn {
-    return ({disabled}: RenderProps) => {
-      const {fieldfns, state, onUpdate} = props;
+    return ({ disabled }: RenderProps) => {
+      const { fieldfns, state, onUpdate } = props;
       const errlabel = fieldfns.validate(state);
       const element = (
-        <TextField 
-          size="small" 
+        <TextField
+          size="small"
           fullWidth
           error={!!errlabel}
-          helperText={errlabel} 
-          value={state} 
-          onChange={(s) => onUpdate(s.currentTarget.value)} 
+          helperText={errlabel}
+          value={state}
+          onChange={(s) => onUpdate(s.currentTarget.value)}
           disabled={disabled}
         />
-        );
+      );
       return fieldElement(element);
     }
   }
-  
+
   renderStructEditor(props: StructEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
       const rows: GridRow[] = props.fields.map(fd => {
-        const label = rprops.disabled? fd.label : <b>{fd.label}</b>;
+        const label = rprops.disabled ? fd.label : <b>{fd.label}</b>;
         const rendered = fd.veditor.veditor.render(fd.veditor.state, fd.veditor.onUpdate)(rprops);
         const element = rendered.gridElement();
-        return {kind:'labelled', label, element} as GridRow
+        const row: GridRow = { kind: 'labelled', label, element, description: fd.description };
+        return row;
       });
 
       return {
@@ -82,10 +83,10 @@ export class UiFactory implements Factory<RenderFn> {
       }
     }
   }
-  
+
   renderUnionEditor(props: UnionEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
-      const select= <Select state={props.selectState}/>;
+      const select = <Select state={props.selectState} />;
       const underlying = props.veditor && props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
       return {
         element: () => {
@@ -107,10 +108,10 @@ export class UiFactory implements Factory<RenderFn> {
       }
     }
   }
-  
+
   renderMaybeEditor(props: MaybeEditorProps<RenderFn>): RenderFn {
     return (rprops: RenderProps) => {
-      const toggle = <Toggle disabled={rprops.disabled} checked={props.isActive} onChange={props.toggleIsActive}/>;
+      const toggle = <Toggle disabled={rprops.disabled} checked={props.isActive} onChange={props.toggleIsActive} />;
       const underlying = props.veditor.veditor.render(props.veditor.state, props.veditor.onUpdate)(rprops);
       return {
         element: () => {
@@ -132,25 +133,25 @@ export class UiFactory implements Factory<RenderFn> {
       }
     }
   }
-  
+
   renderVectorEditor<T>(props: VectorEditorProps<T, RenderFn>): RenderFn {
-    return (_rprops: RenderProps) => wideFieldElement(<VectorVeditor {...props}/>);
+    return (_rprops: RenderProps) => wideFieldElement(<VectorVeditor {...props} />);
   }
-  
+
   renderUnimplementedEditor(props: UnimplementedEditorProps): RenderFn {
     return (_rprops: RenderProps) => wideFieldElement(
       <div>unimplemented veditor for {typeExprToStringUnscoped(props.typeExpr)}</div>,
     )
   }
 
-  addCustomVEditor(vc : VEditorCustomize<RenderFn>) {
+  addCustomVEditor(vc: VEditorCustomize<RenderFn>) {
     this.veditorCustomize.push(vc);
   }
 
-  addCustomField(fc : FieldCustomize) {
+  addCustomField(fc: FieldCustomize) {
     this.fieldCustomize.push(fc);
   }
-  
+
   getCustomVEditor(ctx: CustomContext): VEditor<unknown> | null {
     for (const c of this.veditorCustomize) {
       const veditor = c(ctx);
@@ -179,7 +180,7 @@ interface VectorItemFormProps<T> {
   onCancel?(): void;
 }
 
-function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
+function VectorItemForm(props: VectorItemFormProps<unknown>): JSX.Element {
   const formState = useAdlFormState({
     value0: props.value0,
     veditor: props.veditor,
@@ -194,46 +195,48 @@ function VectorItemForm(props: VectorItemFormProps<unknown>) : JSX.Element {
   );
 }
 
-function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
+function VectorVeditor<T>(props: VectorEditorProps<T, RenderFn>) {
 
-    interface ModalState {
-      value0: T | undefined;
-      onApply: (value: T) => void;
+  interface ModalState {
+    value0: T | undefined;
+    onApply: (value: T) => void;
   };
 
-  const [modalState,setModalState] = React.useState<ModalState| undefined>();
+  const [modalState, setModalState] = React.useState<ModalState | undefined>();
 
   function deleteItem(i: number) {
     props.splice(i, 1, []);
   }
 
   function moveItemUp(i: number) {
-    props.splice(i-1, 2, [props.values[i], props.values[i-1]]);
+    props.splice(i - 1, 2, [props.values[i], props.values[i - 1]]);
   }
 
   function moveItemDown(i: number) {
-    props.splice(i, 2, [props.values[i+1], props.values[i]]);
+    props.splice(i, 2, [props.values[i + 1], props.values[i]]);
   }
 
   function insertItemAfter(i: number) {
     setModalState({
       value0: undefined,
-      onApply: (t:T) => {
-        props.splice(i+1, 0, [t]);
+      onApply: (t: T) => {
+        props.splice(i + 1, 0, [t]);
         setModalState(undefined);
-    }})
+      }
+    })
   }
 
   function editItem(i: number) {
     setModalState({
       value0: props.values[i],
-      onApply: (t:T) => {
+      onApply: (t: T) => {
         props.splice(i, 1, [t]);
         setModalState(undefined);
-    }})
+      }
+    })
   }
 
-  function renderModal() : JSX.Element | undefined {
+  function renderModal(): JSX.Element | undefined {
     if (modalState) {
       return (
         <Modal onClickBackground={() => setModalState(undefined)}>
@@ -259,24 +262,24 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
   });
   const hcontrols = (
     <RowControls>
-      <AddIcon fontSize="small" onClick={() => insertItemAfter(props.values.length - 1)}/>
+      <AddIcon fontSize="small" onClick={() => insertItemAfter(props.values.length - 1)} />
     </RowControls>
   );
 
-  const rows = props.values.map((v,i) => {
-    const row = props.columns.map( (c) => {
-      return <TableCell key={c.id}>{renderContent(c.content(v,i))}</TableCell>;
+  const rows = props.values.map((v, i) => {
+    const row = props.columns.map((c) => {
+      return <TableCell key={c.id}>{renderContent(c.content(v, i))}</TableCell>;
     });
-    
+
     const canMoveUp = i > 0;
     const canMoveDown = i < props.values.length - 1;
-    
+
     const controls = (
       <RowControls>
-        <EditIcon fontSize="small" onClick={() => editItem(i)}/>
-        <ArrowUpwardIcon fontSize="small" onClick={() => canMoveUp && moveItemUp(i)}/>
-        <ArrowDownwardIcon fontSize="small" onClick={() => canMoveDown && moveItemDown(i)}/>
-        <DeleteIcon fontSize="small" onClick={() => deleteItem(i)}/>
+        <EditIcon fontSize="small" onClick={() => editItem(i)} />
+        <ArrowUpwardIcon fontSize="small" onClick={() => canMoveUp && moveItemUp(i)} />
+        <ArrowDownwardIcon fontSize="small" onClick={() => canMoveDown && moveItemDown(i)} />
+        <DeleteIcon fontSize="small" onClick={() => deleteItem(i)} />
       </RowControls>
     );
     return <TableRow key={i.toString()}>{row}<TableCell>{controls}</TableCell></TableRow>;
@@ -297,7 +300,7 @@ function VectorVeditor<T>(props: VectorEditorProps<T,RenderFn>) {
 
 function wideGridRow(element: JSX.Element | undefined): GridRow[] {
   if (element) {
-    return [{kind:'wide', element}];
+    return [{ kind: 'wide', element }];
   }
   return [];
 }
@@ -305,9 +308,9 @@ function wideGridRow(element: JSX.Element | undefined): GridRow[] {
 function renderStructRows(keyprefix: number[], rows: GridRow[]) {
   const result: JSX.Element[] = [];
   const indent = keyprefix.length;
-  const indentElement = indent == 0 ? undefined : <Box sx={{width:`${indent * 30}px`}} />;
-  rows.forEach( (row,i) => {
-    const key = [...keyprefix, i ];
+  const indentElement = indent == 0 ? undefined : <Box sx={{ width: `${indent * 30}px` }} />;
+  rows.forEach((row, i) => {
+    const key = [...keyprefix, i];
     const keyString = key.toString();
     if (row.kind === 'wide') {
       result.push(
@@ -317,7 +320,14 @@ function renderStructRows(keyprefix: number[], rows: GridRow[]) {
       result.push(
         <Fragment key={keyString}>
           <StructGridLabel>{indentElement}{row.label}</StructGridLabel>
-          {row.element.beside && <StructGridValue>{row.element.beside}</StructGridValue>}
+          {row.element.beside && row.description === "" &&
+             <StructGridValue>{row.element.beside}</StructGridValue>
+          }
+          {row.element.beside && row.description !== "" &&
+            <FieldTooltip arrow title={row.description}>
+             <StructGridValue>{row.element.beside}</StructGridValue>
+            </FieldTooltip>
+          }
         </Fragment>
       );
       if (row.element.below) {
@@ -329,35 +339,43 @@ function renderStructRows(keyprefix: number[], rows: GridRow[]) {
 }
 
 const StructGrid = styled('div')({
-   display: 'grid',
-   gridTemplateColumns: 'auto 1fr',
-   gridColumnGap: '20px',
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr',
+  gridColumnGap: '20px',
 });
 
 const StructGridLabel = styled('div')({
-   display: 'flex',
-   flexDirection: 'row',
-   gridColumnStart: '1',
-   gridColumnEnd: '1',
-   marginTop: '20px',
+  display: 'flex',
+  flexDirection: 'row',
+  gridColumnStart: '1',
+  gridColumnEnd: '1',
+  marginTop: '20px',
 });
 
 const StructGridValue = styled('div')({
-   gridColumnStart: '2',
-   gridColumnEnd: '2',
-   marginTop: '10px',
+  gridColumnStart: '2',
+  gridColumnEnd: '2',
+  marginTop: '10px',
 });
 
 const StructGridWideValue = styled('div')({
-   display: 'flex',
-   flexDirection: 'row',
-   gridColumnStart: '1',
-   gridColumnEnd: '3',
-   marginTop: '10px',
+  display: 'flex',
+  flexDirection: 'row',
+  gridColumnStart: '1',
+  gridColumnEnd: '3',
+  marginTop: '10px',
 });
 
 const RowControls = styled('div')({
-   display: 'flex',
-   flexDirection: 'row',
-   gap: '5px',
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '5px',
 });
+
+const FieldTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    fontSize: 12,
+  },
+}));

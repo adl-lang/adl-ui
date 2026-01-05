@@ -24,6 +24,14 @@ export function getAnnotation<T>(
   return null;
 }
 
+export function getDescriptionFromAnnotation(
+  dresolver: DeclResolver,
+  field: adlast.Field
+): string | null {
+  const jb = createJsonBinding(dresolver, ui.texprDescription());
+  return getAnnotation(field.annotations, jb);
+}
+
 export function getGroupKeyFromAnnotation(
   dresolver: DeclResolver,
   annotations: adlast.Annotations,
